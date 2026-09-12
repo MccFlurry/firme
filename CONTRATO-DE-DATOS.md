@@ -26,7 +26,7 @@ de WIN se confirmarán con el área dueña; lo que este documento compromete es
 | `email` | Correo | texto (seudonimizado) | registro de venta | en el acto | en el acto | No | Se pierde la colisión por correo y una vía de confirmación. Degradación baja. |
 | `address` | Dirección de instalación | texto (hash normalizado) | registro de venta | en el acto | en el acto | No | Se pierde la colisión por dirección repetida. Degradación baja. |
 | `district` | Distrito o zona | texto (id de zona) | registro de venta | en el acto | en el acto | Sí | Se pierde toda la arista registro–entrega (cobertura/velocidad). Degradación alta: no se puede verificar que la zona soporta el plan. |
-| `consent_evidence` | Evidencia de consentimiento (grabación, firma, SMS) | enumerado | registro de venta / grabación | en el acto | en el acto | No (la ausencia es señal) | Su ausencia dispara la señal de identidad por diseño. No bloquea por sí solo, pero suma evidencia hacia REVISAR/RETENER. |
+| `consent_evidence` | Evidencia de consentimiento (grabación, firma, SMS) | enumerado | registro de venta / grabación | en el acto | en el acto | No (la ausencia es señal) | Si el campo existe y llega vacío, dispara la señal de identidad por diseño y empuja hacia REVISAR. Si el sistema origen no expone el campo, la señal no se calcula y se reporta como campo faltante. |
 
 ### Vendedor y canal
 
@@ -87,7 +87,7 @@ puntuales y se declara en pantalla como campos faltantes.
 | `promise_text` | lingüística, promesa↔catálogo, promesa↔registro | Pierde dos aristas del rombo; queda catálogo↔registro + señales no obvias. |
 | `plan` o `price` | promesa↔catálogo, catálogo↔registro, cobertura | Si faltan ambos → **abstenerse**. Si falta uno, decisión con más ruido y menos aristas. |
 | `district` | registro↔entrega (cobertura/velocidad) | No se puede verificar compatibilidad técnica; degradación alta. |
-| `consent_evidence` | identidad (ausencia) | La ausencia dispara la señal por diseño: empuja hacia REVISAR/RETENER. |
+| `consent_evidence` | identidad (ausencia) | Valor vacío: dispara la señal y empuja hacia REVISAR. Campo no expuesto por el origen: la señal no se calcula y se declara como faltante. |
 | `phone`/`email`/`customer_doc` | colisiones, confirmación | Sin los tres → **abstenerse**. Falta parcial: se pierde una vía de confirmación y una colisión. |
 | `edits` | reedición | Se pierde la señal de precio/identidad editados. |
 | `registered_at` | hora fuera de patrón, ráfaga | La ráfaga se degrada a conteo sin orden temporal. |

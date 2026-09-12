@@ -73,3 +73,30 @@ def test_ventas_wrapper_and_dict_list_input():
     sales, report = parse([{"customer": "Luis", "phone": "923456789"}])
     assert len(sales) == 1
     assert sales[0].customer_name == "Luis"
+
+
+def test_consent_column_absent_is_unknown_not_missing():
+    from contracts.types import Context
+    from engine import evaluate
+
+    without_column, _ = parse([{"cliente": "Ana", "telefono": "912345678", "plan": "fibra_200", "precio": 79.90}])
+    with_empty_value, _ = parse([{"cliente": "Ana", "telefono": "912345678", "plan": "fibra_200", "precio": 79.90,
+                                  "consentimiento": ""}])
+    assert without_column[0].extra.get("consent_not_in_source") is True
+    assert "consent_not_in_source" not in with_empty_value[0].extra
+    absent = evaluate(without_column[0], Context())
+    empty = evaluate(with_empty_value[0], Context())
+    assert "R13_sin_consentimiento" not in {item.rule_id for item in absent.evidence}
+    assert "R13_sin_consentimiento" in {item.rule_id for item in empty.evidence}
+    assert absent.decision == "APROBAR"
+    assert empty.decision == "REVISAR"
+
+
+def test_edit_history_column_is_kept_for_the_reedit_signal():
+    edits = [{"field": "price", "at": "2026-09-10T10:05:00", "old": "99.9", "new": "89.9"},
+             {"field": "price", "at": "2026-09-10T10:07:00", "old": "89.9", "new": "79.9"}]
+    sales, _ = parse([{"id": "V-9", "plan": "fibra_400", "precio": 79.9, "telefono": "912345678",
+                       "registered_at": "2026-09-10T10:00:00", "edits": edits}])
+    assert [edit.field for edit in sales[0].edits] == ["price", "price"]
+    csv_sales, _ = parse("id,plan,precio,telefono,ediciones\nV-8,fibra_400,79.9,912345678,\"not json\"\n", "x.csv")
+    assert csv_sales[0].edits == []

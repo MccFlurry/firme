@@ -266,8 +266,8 @@
   - consent_missing
   - confirmation_status
   impacts:
-    reclamo: 0.2
-    baja_temprana: 0.12
+    reclamo: 0.12
+    baja_temprana: 0.05
   fix: null
 - id: R14_colision_telefono
   name: Colisión de teléfono entre titulares

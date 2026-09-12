@@ -50,10 +50,11 @@ FIELD_SYNONYMS = {
                      "oferta texto", "lo prometido", "promesa ofrecida"],
     "label": ["label", "etiqueta", "resultado", "es buena", "fraude", "etiqueta demo",
               "ground truth", "es mala", "resultado real"],
+    "edits": ["edits", "ediciones", "edit history", "historial", "historial de cambios", "cambios"],
 }
 
 EXTRA_SYNONYMS = ["extra", "adicional", "adicionales", "datos adicionales"]
-IGNORED_SYNONYMS = ["edits", "edit", "edit history", "historial", "historial de cambios"]
+IGNORED_SYNONYMS: list[str] = []
 
 LABEL_POSITIVE = {"buena", "good", "valida", "valido", "ok", "si", "yes", "sano",
                   "true", "1", "correcta", "aprobada", "aprobado"}
@@ -145,6 +146,13 @@ def _coerce(field: str, raw):
         return _to_int(raw)
     if field == "label":
         return _normalize_label(raw)
+    if field == "edits":
+        if isinstance(raw, str):
+            try:
+                raw = json.loads(raw)
+            except (json.JSONDecodeError, TypeError, ValueError):
+                return []
+        return raw if isinstance(raw, list) else []
     return raw
 
 
@@ -245,6 +253,9 @@ def parse(payload: str | bytes | list[dict], filename: str | None = None) -> tup
                         extra[column] = raw
                     continue
                 values[field] = _coerce(field, raw)
+            if "consent_evidence" not in mapped.values():
+                # The source never exposes consent: the absence signal cannot be computed, only reported.
+                extra["consent_not_in_source"] = True
             if extra:
                 values["extra"] = extra
             values["id"] = str(values.get("id") or "")

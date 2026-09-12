@@ -91,7 +91,8 @@ def build_facts(sale: Sale, ctx: Context, catalog: dict, settings=None, costs=No
         registered_install_days=(installation.date() - registered.date()).days if installation and registered else None,
         window_install_date=(registered + timedelta(hours=settings["install_window_hours"])).isoformat() if registered else None,
         hour=registered.hour if registered else None,
-        consent_missing=not bool(sale.consent_evidence and sale.consent_evidence.strip()),
+        consent_missing=not bool(sale.consent_evidence and sale.consent_evidence.strip())
+        and not sale.extra.get("consent_not_in_source"),
         confirmation_status=confirmation.status if confirmation else None,
         confirmation_note=confirmation.note if confirmation else None,
         promise_plan=promise_plan, promise_plan_exists=promise_plan in plans,

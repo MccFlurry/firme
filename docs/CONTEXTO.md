@@ -5,7 +5,8 @@ Prometido · Hackatón WIN Chiclayo 2026 · Reto 03
 Este documento es el artefacto de traspaso: lo primero que se le da a cualquier
 persona o modelo que entra a mitad de camino. Se actualiza al cerrar cada fase.
 
-**Estado del proyecto: en construcción.**
+**Estado del proyecto: construido y commiteado de punta a punta. Pendiente: el
+despliegue a una URL pública.**
 
 ---
 
@@ -101,15 +102,28 @@ No se reabren. Cada una con su porqué.
 
 ---
 
-## 5. Cómo levantarlo y llegar al primer veredicto
+## 5. Cómo levantarlo y recorrerlo de punta a punta
 
 ```bash
-.venv/bin/uvicorn app.main:app --port 8765
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn app.main:app --reload
 ```
 
-Abrir `http://localhost:8765`, cargar una venta por el formulario (o "Cargar
-ejemplo") y `POST /ventas` redirige a `GET /ventas/{id}`, que muestra decisión,
-costo esperado, cadena de evidencia y contrafáctico.
+Abrir `http://127.0.0.1:8000`. Una pantalla por función:
+
+- `GET /` — formulario de venta (móvil primero, botón "Cargar ejemplo").
+- `POST /ventas` → `GET /ventas/{id}` — veredicto: decisión, costo esperado,
+  cadena de evidencia, contrafáctico y bloque de confirmación.
+- `GET/POST /ventas/{id}/editar` — edición que alimenta la señal de reedición.
+- `GET /lote` · `POST /lote` — pegar o subir JSON/CSV, o "Cargar los 25 casos de
+  demo"; reporte de ingesta, tabla y matriz de confusión.
+- `POST /confirm/create/{id}` → `GET /c/{token}` · `POST /c/{token}` —
+  confirmación del cliente por enlace; `POST /confirm/expire/{id}` simula el
+  silencio.
+- `GET /bandeja` · `POST /bandeja/{id}/hecho` — avisos con destinatario,
+  urgencia y plazo.
+- `GET /salud` — `{"ok": true, "llm": "..."}`.
 
 Gates, en este orden:
 
@@ -123,12 +137,32 @@ Gates, en este orden:
 
 ## 6. Qué está terminado, qué está a medias, qué no se empezó
 
-**En construcción — pendiente de actualizar al cerrar cada fase.**
+**Estado real, leído del código (12/09). T1–T5 terminados y commiteados. Falta
+solo el despliegue a una URL pública, pendiente de crear la cuenta de hosting.**
 
-- Terminado: `contracts/types.py` (congelado), `app/store.py`, esqueleto del repo.
-- A medias: —
-- No empezado: motor (`engine/`), config (`config/*.yaml`), aplicación web
-  (`app/`), confirmación (`confirm/`), casos (`data/cases.json`), despliegue.
+- **Terminado:**
+  - `contracts/types.py` (congelado) y `app/store.py` (JSON + lock de proceso).
+  - Motor (`engine/`): `evaluate`, facts, 29 reglas en `config/rules.yaml`
+    (seis aristas del rombo + señales), costo esperado (noisy-OR), decisión,
+    contrafáctico, LLM opcional con degradación determinista e ingesta tolerante
+    (`engine.ingest.parse`).
+  - Config (`config/*.yaml`): catálogo, reglas, costos, léxico y ventanas, todo
+    `SUPUESTO_DEMO`.
+  - Web (`app/`): formulario, veredicto, edición, lote, bandeja y salud.
+  - Confirmación (`confirm/`): enlace por token, pantalla del cliente,
+    corregir/desconocer y silencio.
+  - `data/cases.json`: 25 casos sintéticos etiquetados (12 "buena", 13 "mala",
+    varios de borde).
+  - Despliegue listo: `Dockerfile`, `render.yaml`, `fly.toml`.
+  - Tests: 52 verdes (`tests/test_engine.py`, `tests/test_ingest.py`).
+- **A medias:** —
+- **No empezado / pendiente:** despliegue a URL pública (falta la cuenta de
+  hosting); edición de
+  umbrales desde la UI (solo si sobra tiempo).
+
+Fases: T1 motor ✓ · T2 documentos + contrato ✓ · T3 web ✓ · T3b ingesta/lote ✓ ·
+T4 confirmación ✓ · T5 casos ✓ · T6 README/guion/contexto (este cierre) · T7
+verificación ✓ (nueve bloqueantes PASA, 12/09).
 
 ---
 
