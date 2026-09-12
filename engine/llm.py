@@ -217,7 +217,7 @@ def _explain(instruction, data, fallback):
                 # Drop meta sentences that echo the instructions ("no se introduce ninguna conclusión adicional").
                 sentences = re.split(r"(?<=[.!?])\s+", text.strip())
                 kept = [s for s in sentences if not re.search(
-                    r"conclusi[oó]n adicional|estas instrucciones|no se introduce|no se agrega|no se añade", s, re.I)]
+                    r"conclusi[oó]n adicional|estas instrucciones|no se introduce|no se agrega|no se añade|no se mencionan", s, re.I)]
                 return " ".join(kept).strip() or text.strip()
         _fallback("explanation validation", ValueError())
     return fallback

@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import httpx
 import pytest
 
-from contracts.types import Context, Sale
+from contracts.types import Context, Promise, Sale
 from engine import evaluate, llm
 from engine.ingest import parse
 from engine.rules import load_config
@@ -166,6 +166,16 @@ def test_fabricated_explanation_and_invalid_json_fall_back(monkeypatch):
             "choices": [{"message": {"content": "not json"}}]}))
     promise, mode = llm.normalize_promise("S/ 59.50", load_config("catalog"))
     assert mode == "determinista" and promise.price == 59.5
+
+
+def test_meta_explanation_sentence_is_removed(monkeypatch):
+    mock_http(monkeypatch, {
+        "text": "La decisión es RETENER por R23_promesa_insostenible. No se mencionan otras reglas activadas."
+    })
+    sale = Sale(id="V-TEST", phone="900000001", plan="fibra_850", price=59.5,
+                promise=Promise(claims=["velocidad garantizada"], source="llm"))
+    text = llm.explain_verdict(sale, evaluate(sale, Context()))
+    assert "R23_promesa_insostenible" in text and "No se mencionan" not in text
 
 
 def test_batch_summary_accepts_the_computed_row_count(monkeypatch):
