@@ -1,5 +1,5 @@
 origen: SUPUESTO_DEMO
-fuente: "Plan Prometido: ventanas y umbrales de señales para la demo."
+fuente: "Plan Firme: ventanas y umbrales de señales para la demo."
 install_window_hours: 48
 confirmation_window_hours: 24
 alert_buffer_hours: 12

@@ -1,6 +1,6 @@
 # Guía de entrevista a vendedores
 
-Prometido · Hackatón WIN Chiclayo 2026 · Reto 03 · Fase 0
+Firme · Hackatón WIN Chiclayo 2026 · Reto 03 · Fase 0
 
 Objetivo: descubrir cómo se rompe la promesa en la práctica y qué atajos existen
 hoy, sin tono de auditoría. El vendedor honesto es nuestro aliado: es quien más

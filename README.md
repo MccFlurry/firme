@@ -1,4 +1,4 @@
-# Prometido
+# Firme
 
 **Que lo prometido sea lo entregado.**
 
@@ -20,7 +20,7 @@ Hackatón WIN Chiclayo 2026 · Reto 03 · Área dueña: Calidad de venta.
 
 ## 2. Nuestra respuesta, en tres frases
 
-Prometido trata la **promesa** como objeto de primera clase: en lugar de puntuar
+Firme trata la **promesa** como objeto de primera clase: en lugar de puntuar
 la venta registrada, compara cuatro representaciones de la misma venta —lo que se
 prometió, el catálogo vigente, lo que quedó registrado y lo que se va a entregar—
 y cada desacuerdo entre dos de ellas es un defecto que se explica con nombres y
@@ -118,9 +118,9 @@ los priors dejan de ser supuestos de demo.
 
 | Integrante | Rol | Responsable de |
 |---|---|---|
-| `<INTEGRANTE_1>` | Motor | reglas, comparadores, costo esperado, señales, contrafáctico (`/engine`) |
-| `<INTEGRANTE_2>` | Superficie | ingesta del lote, vistas, veredicto, datos sintéticos (`/app`) |
-| `<INTEGRANTE_3>` | Circuito | confirmación del cliente, capa de aviso, contrato de datos, despliegue, guion (`/confirm`, `/docs`) |
+| Roger Zavaleta Marcelo | Motor | reglas, comparadores, costo esperado, señales, contrafáctico (`/engine`) |
+| Abraham Vidaurre Serpa | Superficie | ingesta del lote, vistas, veredicto, datos sintéticos (`/app`) |
+| Jonatan Ching Ayacila | Circuito | confirmación del cliente, capa de aviso, contrato de datos, despliegue, guion (`/confirm`, `/docs`) |
 
 El contrato entre las tres carpetas es el tipo compartido de `/contracts`,
 congelado al cerrar la fase 1.
@@ -139,7 +139,7 @@ Abre `http://127.0.0.1:8000`.
 
 ## Cómo desplegar
 
-- **Docker:** `docker build -t prometido .` y `docker run -p 8000:8000 prometido`.
+- **Docker:** `docker build -t firme .` y `docker run -p 8000:8000 firme`.
 - **Render:** el repo incluye `render.yaml` (servicio web free, runtime Docker,
   health check en `/salud`).
 - **Fly.io:** el repo incluye `fly.toml`; ejecuta `fly deploy`.

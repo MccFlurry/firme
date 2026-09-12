@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: prometido
+    name: firme
     runtime: docker
     plan: free
     healthCheckPath: /salud

@@ -1,4 +1,4 @@
-# Guion de demo — Prometido (5 minutos)
+# Guion de demo — Firme (5 minutos)
 
 Objetivo: que el jurado abra el prototipo en su teléfono, le dé un lote que nunca
 vimos, y vea cómo el sistema lo separa y lo explica. Cinco minutos cronometrados,

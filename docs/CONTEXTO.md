@@ -1,6 +1,6 @@
 # Contexto del proyecto
 
-Prometido · Hackatón WIN Chiclayo 2026 · Reto 03
+Firme · Hackatón WIN Chiclayo 2026 · Reto 03
 
 Este documento es el artefacto de traspaso: lo primero que se le da a cualquier
 persona o modelo que entra a mitad de camino. Se actualiza al cerrar cada fase.
@@ -12,7 +12,7 @@ despliegue a una URL pública.**
 
 ## 1. Qué es esto y qué pregunta responde
 
-Prometido responde a la pregunta del reto: ¿cómo verificamos que cada venta fue
+Firme responde a la pregunta del reto: ¿cómo verificamos que cada venta fue
 hecha como debe ser —con el cliente correcto y con la promesa correcta— antes de
 que se convierta en instalación, factura y problema?
 

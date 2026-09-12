@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Editar venta' if sale else 'Nueva venta' }} · Prometido{% endblock %}
+{% block title %}{{ 'Editar venta' if sale else 'Nueva venta' }} · Firme{% endblock %}
 {% macro input(field, type='text', placeholder='', step=none) %}
 <label>{{ field_labels[field] }}
   <input name="{{ field }}" type="{{ type }}" value="{{ values.get(field) if values.get(field) is not none else '' }}" placeholder="{{ placeholder }}" {% if type == 'number' %}min="0"{% endif %} {% if step %}step="{{ step }}"{% endif %} {% if type in ['text', 'tel', 'email'] %}maxlength="500"{% endif %}>

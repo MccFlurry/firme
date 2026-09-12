@@ -1,4 +1,4 @@
-# Plan — Prometido (Hackatón WIN Chiclayo 2026 · Reto 03)
+# Plan — Firme (Hackatón WIN Chiclayo 2026 · Reto 03)
 
 Spec de origen: `/Users/mccflurry/Downloads/Prompt-Maestro-WIN-Reto03-v2.md` (prompt maestro v2).
 Este plan traduce ese prompt a tareas por carril. Lo que el prompt fija, este plan no reabre.
@@ -8,7 +8,7 @@ Este plan traduce ese prompt a tareas por carril. Lo que el prompt fija, este pl
 Un jurado abre una URL en su teléfono, pega un lote de ventas que nunca vimos, y el sistema
 separa buenas de malas explicando **qué no coincide con qué** (promesa ↔ catálogo ↔ registro
 ↔ entregable), con costo esperado en soles, contrafáctico, confirmación del cliente por enlace
-y bandeja de avisos. Nombre del producto: **Prometido** (sin la marca WIN).
+y bandeja de avisos. Nombre del producto: **Firme** (sin la marca WIN).
 
 Encuadre obligatorio en toda copia de UI y docs: *protege las ventas buenas de quedar atrapadas
 en revisión, protege al cliente de una promesa que no se sostiene, y protege al vendedor honesto
@@ -302,7 +302,7 @@ Por qué: integra motor, UI móvil y despliegue sin patrón previo. Depende de T
   - `app.include_router(confirm_router)` importando `from confirm.router import router as
     confirm_router` dentro de un `try/except ImportError` con un router vacío de reemplazo
     hasta que T4 exista.
-- [x] `app/templates/base.html`: cabecera con nombre **Prometido**, subtítulo "Que lo
+- [x] `app/templates/base.html`: cabecera con nombre **Firme**, subtítulo "Que lo
   prometido sea lo entregado", marca de agua `SIMULADO` fija, navegación (Nueva venta · Lote ·
   Bandeja), pie con el encuadre. `app/static/app.css` ≤ 200 líneas, móvil primero, tipografía
   del sistema, colores de decisión (APROBAR verde, REVISAR ámbar, RETENER rojo, ABSTENERSE

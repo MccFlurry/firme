@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#163d38">
-  <title>Confirma tu servicio · Prometido</title>
+  <title>Confirma tu servicio · Firme</title>
   <link rel="stylesheet" href="/static/app.css">
   <style>
     body { display: grid; place-items: center; min-height: 100vh; padding: 1rem; }
@@ -23,7 +23,7 @@
   <main class="client">
     <form method="post" action="/c/{{ confirmation.token }}">
       <section class="panel">
-        <p class="eyebrow">Prometido</p>
+        <p class="eyebrow">Firme</p>
         <h1>¿Es esto lo que acordaste?</h1>
         <p class="offer">{{ text }}</p>
         <p class="hint">{{ 'Capa LLM: activa' if mode == 'llm' else 'Capa LLM: no disponible, comparador determinista' }}</p>

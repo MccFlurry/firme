@@ -1,6 +1,6 @@
 # Banco de preguntas para el mentor comercial
 
-Prometido · Hackatón WIN Chiclayo 2026 · Reto 03 · Fase 0
+Firme · Hackatón WIN Chiclayo 2026 · Reto 03 · Fase 0
 
 Estas preguntas están priorizadas: primero las que condicionan el diseño del
 motor, después las que ajustan parámetros. Cada una cierra con qué decidimos a
