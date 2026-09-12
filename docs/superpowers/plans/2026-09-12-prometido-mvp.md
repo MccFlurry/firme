@@ -222,28 +222,28 @@ Orden: T1 ∥ T2 → T3 ∥ T5 → T3b ∥ T4 → T6 → T7. Fable commitea y et
 ### T1 · Motor + config + tests — carril `codex-worker` (gpt-6-astra, xhigh)
 Por qué: sin patrón previo, es el corazón del producto y define semántica.
 
-- [ ] `config/{catalog,rules,costs,lexicon,settings}.yaml` con las formas de arriba. Mínimo 14
+- [x] `config/{catalog,rules,costs,lexicon,settings}.yaml` con las formas de arriba. Mínimo 14
   reglas cubriendo las seis aristas y las seis señales. Cada regla con los ocho campos del
   prompt maestro (`id, name, description, condition, severity, message, source, origen`) más
   `edge, strength, inputs, impacts, fix`.
-- [ ] `engine/facts.py`: construye el dict plano de facts desde `Sale`, `Context` y catálogo
+- [x] `engine/facts.py`: construye el dict plano de facts desde `Sale`, `Context` y catálogo
   (incluye `catalog_price`, `promo_applies`, `zone_supports_plan`, `zone_max_speed`,
   `install_within_window`, `burst_count`, `fill_seconds`, `hour`, `price_edits`,
   `identity_edits`, `phone_collisions`, `email_collisions`, `doc_collisions`,
   `address_collisions`, `consent_missing`, `confirmation_status`, `promise_*`,
   `unsupported_claims`, `price_tolerance`, `prior`). Normaliza direcciones (minúsculas, sin
   tildes, sin puntuación, colapsar espacios). Nunca lanza por campo faltante: `None`.
-- [ ] `engine/llm.py`: `normalize_promise(text, catalog) -> (Promise, LlmMode)` y
+- [x] `engine/llm.py`: `normalize_promise(text, catalog) -> (Promise, LlmMode)` y
   `explain_for_client(sale, promise) -> (str, LlmMode)`. Determinista: regex de velocidad
   (`\d+\s*(mb|megas)`), precio (`S/\s*\d+`), alias de planes y promos del catálogo, claims del
   lexicon. LLM solo si `ANTHROPIC_API_KEY` está definido; cualquier excepción o timeout →
   determinista. Nunca bloquear la demo.
-- [ ] `engine/rules.py`, `engine/cost.py`, `engine/counterfactual.py`, `engine/__init__.py`
+- [x] `engine/rules.py`, `engine/cost.py`, `engine/counterfactual.py`, `engine/__init__.py`
   con `evaluate(sale, ctx) -> Verdict` según las secciones de arriba. El contrafáctico aplica
   los `fix` de las evidencias en orden de severidad descendente, reevalúa tras cada uno, y se
   detiene en `APROBAR`; si ninguno alcanza, `text` lo dice ("ningún cambio de un solo campo
   la haría pasar; requiere confirmación del cliente").
-- [ ] `tests/test_engine.py` (pytest, sin fixtures elaboradas): una venta limpia → APROBAR;
+- [x] `tests/test_engine.py` (pytest, sin fixtures elaboradas): una venta limpia → APROBAR;
   precio bajo tarifa → REVISAR con evidencia R03 y contrafáctico que la lleva a APROBAR;
   promesa con claim insostenible → evidencia lingüística; confirmación `desconocida` →
   RETENER; confirmación `confirmada` limpia identidad; ráfaga de 3 ventas → señal temporal;
@@ -253,18 +253,18 @@ Por qué: sin patrón previo, es el corazón del producto y define semántica.
 ### T2 · Documentos de Fase 0 + contrato de datos — carril `opencode-worker` (deepseek-v4-pro)
 Por qué: es escritura contra una especificación cerrada, no diseño.
 
-- [ ] `docs/PREGUNTAS-MENTOR.md`: máximo 12 preguntas priorizadas al mentor comercial, cada
+- [x] `docs/PREGUNTAS-MENTOR.md`: máximo 12 preguntas priorizadas al mentor comercial, cada
   una con *qué decidimos con la respuesta*. Deben apuntar a lo que el diseño asume:
   ventana venta→instalación real, cómo se registra hoy la promesa, cómo se valida titularidad,
   tasa de instalaciones fallidas por canal, costo real de cada desenlace, qué campos existen en
   el registro, quién recibe hoy los avisos, cuánto tarda una revisión.
-- [ ] `docs/ENTREVISTA-VENDEDORES.md`: 8 preguntas para descubrir cómo se rompe la promesa en
+- [x] `docs/ENTREVISTA-VENDEDORES.md`: 8 preguntas para descubrir cómo se rompe la promesa en
   la práctica y qué atajos existen (sin tono de auditoría; el vendedor honesto es aliado).
-- [ ] `docs/CONTEXTO.md` con las 7 secciones del prompt maestro (§9.1), estado inicial
+- [x] `docs/CONTEXTO.md` con las 7 secciones del prompt maestro (§9.1), estado inicial
   "en construcción", *Decisiones cerradas* copiadas de este plan, *Supuestos sin confirmar*
   (todo `SUPUESTO_DEMO` del catálogo y costos), apartado *Aprendizajes del mentor* vacío con
   plantilla, y apartado *Dudas de diseño* vacío.
-- [ ] `CONTRATO-DE-DATOS.md` en la raíz, nivel producción, según §8 del prompt maestro: tabla
+- [x] `CONTRATO-DE-DATOS.md` en la raíz, nivel producción, según §8 del prompt maestro: tabla
   con las 8 columnas por campo (los campos son los de `contracts/types.py::Sale` más los que
   el arco requiere: resultado de instalación, primera factura, baja en 90 días como etiquetas),
   mecanismo de entrega por campo (API / webhook / lote nocturno / CDC), modo de degradación
@@ -280,7 +280,7 @@ Por qué: es escritura contra una especificación cerrada, no diseño.
 ### T3 · Aplicación web: rebanada vertical + despliegue — carril `codex-worker` (gpt-6-astra, xhigh)
 Por qué: integra motor, UI móvil y despliegue sin patrón previo. Depende de T1.
 
-- [ ] `app/main.py` (FastAPI, Jinja2, static). Rutas:
+- [x] `app/main.py` (FastAPI, Jinja2, static). Rutas:
   - `GET /` formulario de venta (móvil primero) con `promise_text` en lenguaje natural, campos
     de `Sale`, selector de canal/distrito/plan/promo desde el catálogo, `fill_seconds` medido
     en JS desde el primer foco, y ejemplo precargable con un botón "Cargar ejemplo".
@@ -302,35 +302,35 @@ Por qué: integra motor, UI móvil y despliegue sin patrón previo. Depende de T
   - `app.include_router(confirm_router)` importando `from confirm.router import router as
     confirm_router` dentro de un `try/except ImportError` con un router vacío de reemplazo
     hasta que T4 exista.
-- [ ] `app/templates/base.html`: cabecera con nombre **Prometido**, subtítulo "Que lo
+- [x] `app/templates/base.html`: cabecera con nombre **Prometido**, subtítulo "Que lo
   prometido sea lo entregado", marca de agua `SIMULADO` fija, navegación (Nueva venta · Lote ·
   Bandeja), pie con el encuadre. `app/static/app.css` ≤ 200 líneas, móvil primero, tipografía
   del sistema, colores de decisión (APROBAR verde, REVISAR ámbar, RETENER rojo, ABSTENERSE
   gris). `app/static/app.js`: cronómetro de llenado, "Cargar ejemplo", copiar enlace.
-- [ ] `Dockerfile` (python:3.13-slim, `pip install -r requirements.txt`, `uvicorn app.main:app
+- [x] `Dockerfile` (python:3.13-slim, `pip install -r requirements.txt`, `uvicorn app.main:app
   --host 0.0.0.0 --port ${PORT:-8000}`), `render.yaml` (web service free, Docker),
   `fly.toml` mínimo. Sin secretos.
-- [ ] Verificar con `.venv/bin/uvicorn app.main:app --port 8765` + `curl` que `/`, `POST
+- [x] Verificar con `.venv/bin/uvicorn app.main:app --port 8765` + `curl` que `/`, `POST
   /ventas` y `/ventas/{id}` responden 200 y que el veredicto muestra evidencia y contrafáctico.
 
 ### T3b · Ingesta tolerante + vista de lote — carril `opencode-worker` (deepseek-v4-pro)
 Por qué: algoritmo especificado, con `app/main.py` y `app/templates/verdict.html` como patrón.
 Depende de T3.
 
-- [ ] `engine/ingest.py`: acepta JSON (lista de objetos o `{"ventas": [...]}`), CSV (con
+- [x] `engine/ingest.py`: acepta JSON (lista de objetos o `{"ventas": [...]}`), CSV (con
   `csv.Sniffer`), o lista de dicts. Mapea columnas a campos de `Sale` con un diccionario de
   sinónimos (es/en, con y sin tildes, snake/camel) y `difflib.get_close_matches(cutoff=0.75)`.
   Reporta `mapped`, `unrecognized` (van a `Sale.extra`), `missing`. Filas con error se
   reportan en `errors` y se omiten; **nunca lanza**. Etiquetas: cualquier columna
   `label|etiqueta|resultado|es_buena|fraude` normalizada a `buena|mala`.
-- [ ] `GET /lote`: textarea para pegar, `input type=file`, ejemplo listo para pegar (5 filas
+- [x] `GET /lote`: textarea para pegar, `input type=file`, ejemplo listo para pegar (5 filas
   con esquema *distinto* al nuestro), botón "Cargar los 25 casos de demo" (`data/cases.json`).
   `POST /lote`: evalúa cada fila con historial = filas del lote + ventas guardadas, guarda
   todo, muestra el `IngestReport` (mapeo, no reconocidos, faltantes, errores), tabla ordenada
   por `recoverable_per_minute` con decisión, costo, regla principal, enlace al veredicto; y
   si hay etiquetas, matriz de confusión 2×2 (positivo = decisión ∈ {REVISAR, RETENER};
   ABSTENERSE se cuenta aparte) con precisión y exhaustividad.
-- [ ] Tests en `tests/test_ingest.py`: esquema desconocido con columnas en inglés y con
+- [x] Tests en `tests/test_ingest.py`: esquema desconocido con columnas en inglés y con
   tildes mapea `plan`, `precio`, `telefono`; columna basura va a `unrecognized`; CSV y JSON
   dan el mismo resultado; una fila corrupta no tumba el lote.
 
@@ -338,14 +338,14 @@ Depende de T3.
 Por qué: rutas y efecto ya especificados; patrón `app/main.py` + `app/templates/base.html`.
 Depende de T3.
 
-- [ ] `confirm/router.py` con las rutas de la sección "Confirmación del cliente";
+- [x] `confirm/router.py` con las rutas de la sección "Confirmación del cliente";
   `confirm/service.py` con `create(sale_id)`, `respond(token, status, note)`,
   `expire(sale_id)`, `get(sale_id)`; reevaluación reutilizando la función de evaluación de
   `app/main.py` (extraerla a `app/services.py::evaluate_and_store(sale)` si aún no existe,
   cambio mínimo). Plantillas `confirm/templates/client.html` (sin navegación interna, solo la
   promesa en lenguaje llano, tres botones grandes, marca `SIMULADO`) y `done.html`.
-- [ ] Eventos: `enlace_generado`, `confirmada`, `corregida`, `desconocida`, `silencio`.
-- [ ] Verificar de punta a punta con curl: crear venta → crear enlace → `GET /c/{token}` 200 →
+- [x] Eventos: `enlace_generado`, `confirmada`, `corregida`, `desconocida`, `silencio`.
+- [x] Verificar de punta a punta con curl: crear venta → crear enlace → `GET /c/{token}` 200 →
   `POST` con `desconocida` → el veredicto de la venta pasa a `RETENER`; `confirmada` → baja el
   costo esperado.
 
@@ -353,7 +353,7 @@ Depende de T3.
 Por qué: datos contra una especificación; patrón `contracts/types.py` y `config/rules.yaml`.
 Depende de T1.
 
-- [ ] `data/cases.json`: lista de 25 objetos con esquema `Sale` (sin `promise`, sí
+- [x] `data/cases.json`: lista de 25 objetos con esquema `Sale` (sin `promise`, sí
   `promise_text`), todos con `label`, distribución aproximada: 10 buenas, 10 malas, 5
   ambiguas/límite. Cada caso mal etiquetado dispara al menos una regla concreta de
   `config/rules.yaml` (anotar en un campo `extra.nota_demo` qué regla debe disparar). Incluir:
@@ -362,14 +362,14 @@ Depende de T1.
   consentimiento, precio bajo tarifa, reedición de precio, llenado en 20 s, registro a las
   02:40, y ventas buenas en todos los canales. Nombres, DNI (8 dígitos), teléfonos (9 dígitos,
   empiezan en 9) y correos generados; nada real. Marcar `extra.simulado: true` en todos.
-- [ ] Verificar con `.venv/bin/python -c` que los 25 cargan como `Sale` y que
+- [x] Verificar con `.venv/bin/python -c` que los 25 cargan como `Sale` y que
   `engine.evaluate` sobre los 25 da ≥ 8 positivos entre las malas y ≤ 2 positivos entre las
   buenas; ajustar casos (no reglas) si no.
 
 ### T6 · README, guion de demo, CONTEXTO final — carril `opencode-worker` (deepseek-v4-pro)
 Por qué: escritura sobre un sistema ya construido. Depende de T3b y T4.
 
-- [ ] `README.md` con la estructura obligatoria del §9 del prompt maestro, en ese orden: (1)
+- [x] `README.md` con la estructura obligatoria del §9 del prompt maestro, en ese orden: (1)
   pregunta del reto literal, (2) respuesta en tres frases, (3) enlace a la demo (marcador
   `<URL-DEMO>` que Fable reemplaza), (4) cómo probarlo en 60 segundos con un caso listo para
   pegar, (5) qué es real y qué es simulado, (6) enlace a `CONTRATO-DE-DATOS.md` y sección
@@ -377,16 +377,16 @@ Por qué: escritura sobre un sistema ya construido. Depende de T3b y T4.
   lado de WIN en cada etapa), (7) quiénes somos con el reparto Motor/Superficie/Circuito y
   marcadores `<INTEGRANTE_1..3>`. Más: cómo correrlo local (`python -m venv`, `uvicorn`), cómo
   desplegar (Render/Fly/Docker), variables (`ANTHROPIC_API_KEY` opcional).
-- [ ] `docs/GUION-DEMO.md`: 5 minutos cronometrados por bloques de 30–60 s, qué se muestra en
+- [x] `docs/GUION-DEMO.md`: 5 minutos cronometrados por bloques de 30–60 s, qué se muestra en
   pantalla en cada uno, el lote del jurado, la confirmación desde un segundo teléfono, la
   bandeja, y la ruta de respaldo si no hay red (servidor local + `data/cases.json`).
-- [ ] `docs/CONTEXTO.md` actualizado: secciones 5 y 6 con el estado real (terminado / a
+- [x] `docs/CONTEXTO.md` actualizado: secciones 5 y 6 con el estado real (terminado / a
   medias / no empezado) leyendo el código.
 
 ### T7 · Verificación final contra los nueve bloqueantes — carril agente `sonnet` (curl, sin editar)
 Por qué: el que construyó es el peor juez. Modelo distinto, ejecutando, no leyendo.
 
-- [ ] Levantar el servidor, recorrer los nueve bloqueantes del §6 del prompt maestro con
+- [x] Levantar el servidor, recorrer los nueve bloqueantes del §6 del prompt maestro con
   `curl` (y `ANTHROPIC_API_KEY` sin definir para probar la degradación), reportar cada uno
   como PASA/FALLA con la evidencia (código HTTP, fragmento de HTML). No corregir nada.
 
