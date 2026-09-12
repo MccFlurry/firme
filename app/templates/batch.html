@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Lote de ventas · Prometido{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <p class="eyebrow">Pega o sube un lote</p>
+  <h1>Ingesta tolerante de un lote de ventas</h1>
+  <p>El sistema reconoce columnas en español o inglés, con o sin tildes, y las mapea a los campos conocidos. Las filas rotas se omiten y se reportan; nunca se pierde el lote por una fila.</p>
+</div>
+{% if error %}<div class="notice error" role="alert"><strong>No se procesó el lote.</strong> {{ error }}</div>{% endif %}
+<section class="panel">
+  <div class="section-heading"><h2><span class="step">01</span> Pegar o subir</h2></div>
+  <form id="batch-form" action="/lote" method="post" enctype="multipart/form-data">
+    <label for="payload">Contenido del lote (JSON o CSV)</label>
+    <textarea id="payload" name="payload" rows="10" spellcheck="false" placeholder='Pega aquí JSON (lista o {"ventas": [...]}) o CSV con encabezado.'></textarea>
+    <label for="file">O sube un archivo (.json, .csv o .txt)</label>
+    <input id="file" name="file" type="file" accept=".json,.csv,.txt">
+    <div class="form-actions">
+      <button class="button" type="submit">Procesar lote <span aria-hidden="true">→</span></button>
+      <button class="button secondary" type="submit" name="demo" value="1">Cargar los 25 casos de demo</button>
+    </div>
+    <p class="hint">El botón de demo usa <code>data/cases.json</code>. El ejemplo de abajo usa un esquema distinto al nuestro para probar el mapeo.</p>
+  </form>
+  <details class="panel"><summary>Ejemplo listo para pegar (5 filas, columnas en inglés)</summary>
+    <pre id="batch-example-pre">{{ example_json }}</pre>
+    <button class="button secondary" type="button" id="load-example">Cargar ejemplo en el cuadro de texto</button>
+  </details>
+</section>
+{% if results is not none %}
+<section class="panel">
+  <div class="section-heading"><h2>Reporte de ingesta</h2><span class="count">{{ report.rows }} filas</span></div>
+  <dl class="facts">
+    <div><dt>Mapeo de columnas</dt><dd>{% for column, field in report.mapped.items() %}<span class="tag">{{ column }} → {{ field }}</span> {% else %}Ninguna columna reconocida.{% endfor %}</dd></div>
+    <div><dt>No reconocidas (a datos adicionales)</dt><dd>{{ report.unrecognized|join(', ') or 'Ninguna' }}</dd></div>
+    <div><dt>Faltantes en el lote</dt><dd>{{ report.missing|join(', ') or 'Ninguno' }}</dd></div>
+    <div><dt>Filas con error (omitidas)</dt><dd>{% for err in report.errors %}<span class="tag">{{ err }}</span> {% else %}Ninguna{% endfor %}</dd></div>
+  </dl>
+</section>
+{% if confusion %}
+<section class="panel">
+  <h2>Matriz de confusión</h2>
+  <p class="hint">Positivo = decisión REVISAR o RETENER sobre las filas etiquetadas. Las abstenciones se cuentan aparte.</p>
+  <div class="table-scroll"><table>
+    <thead><tr><th></th><th>Predijo positivo</th><th>Predijo negativo</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Etiqueta mala</th><td>{{ confusion.tp }}</td><td>{{ confusion.fn }}</td></tr>
+      <tr><th scope="row">Etiqueta buena</th><td>{{ confusion.fp }}</td><td>{{ confusion.tn }}</td></tr>
+    </tbody>
+  </table></div>
+  <div class="metrics">
+    <div><span>Precisión</span><strong>{{ '%.1f'|format(confusion.precision * 100) if confusion.precision is not none else '—' }} %</strong></div>
+    <div><span>Exhaustividad</span><strong>{{ '%.1f'|format(confusion.recall * 100) if confusion.recall is not none else '—' }} %</strong></div>
+    <div><span>Abstenciones</span><strong>{{ confusion.abstained }}</strong></div>
+  </div>
+</section>
+{% endif %}
+<section class="panel">
+  <div class="section-heading"><h2>Resultados</h2><span class="count">{{ results|length }}</span></div>
+  <p class="hint">Ordenadas por costo recuperable por minuto de revisión.</p>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Resultados del lote">
+    <table><thead><tr><th>Venta</th><th>Cliente</th><th>Plan</th><th>Decisión</th><th>Costo esperado</th><th>Regla principal</th><th>Rec/min</th></tr></thead><tbody>
+    {% for row in results %}{% set verdict = row.verdict %}
+    <tr>
+      <th scope="row"><a href="/ventas/{{ verdict.sale_id }}">{{ verdict.sale_id }}</a></th>
+      <td>{{ row.sale.customer_name or 'Sin nombre' }}</td>
+      <td>{{ catalog.plans.get(row.sale.plan, {}).get('name', row.sale.plan) or 'Sin plan' }}</td>
+      <td><span class="tag {{ verdict.decision|lower }}">{{ verdict.decision }}</span></td>
+      <td>S/ {{ '%.2f'|format(verdict.expected_cost) }}</td>
+      <td>{{ row.main_rule.rule_name if row.main_rule else 'Sin regla' }}</td>
+      <td>S/ {{ '%.2f'|format(verdict.recoverable_per_minute) }}</td>
+    </tr>
+    {% endfor %}</tbody></table>
+  </div>
+</section>
+{% endif %}
+<script>
+  (() => {
+    const pre = document.getElementById("batch-example-pre");
+    const load = document.getElementById("load-example");
+    if (load && pre) {
+      load.addEventListener("click", () => {
+        document.getElementById("payload").value = pre.textContent;
+        document.getElementById("payload").focus();
+      });
+    }
+  })();
+</script>
+{% endblock %}

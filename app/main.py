@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, FastAPI, Request
+from fastapi import APIRouter, FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -18,6 +18,7 @@ from starlette.exceptions import HTTPException
 from app import store
 from app.services import evaluate_and_store
 from contracts.types import Event, Sale, Verdict
+from engine.ingest import parse
 from engine.rules import load_config
 
 APP_DIR = Path(__file__).resolve().parent
@@ -243,6 +244,88 @@ def complete_alert(sale_id: str):
 @app.get("/salud")
 def health():
     return {"ok": True, "llm": "configurada" if os.getenv("ANTHROPIC_API_KEY") else "determinista"}
+
+
+DEMO_PATH = Path(__file__).resolve().parent.parent / "data" / "cases.json"
+SEVERITY_ORDER = ("baja", "media", "alta", "bloqueante")
+
+
+def batch_example():
+    return [
+        {"customer": "Ana Quispe", "phone_number": "912345678", "monthly_price": 79.90,
+         "plan_name": "Fibra 200", "label": "buena"},
+        {"customer": "Luis Paredes", "phone_number": "923456789", "monthly_price": 50.00,
+         "plan_name": "Fibra 400", "label": "mala"},
+        {"customer": "Rosa Díaz", "phone_number": "934567890", "monthly_price": 119.90,
+         "plan_name": "Fibra 600", "label": "buena"},
+        {"customer": "Jorge Salas", "phone_number": "945678901", "monthly_price": 99.90,
+         "plan_name": "Fibra 1000", "label": "mala"},
+        {"customer": "Mía Castro", "phone_number": "956789012", "monthly_price": 79.90,
+         "plan_name": "Fibra 200", "label": "buena"},
+    ]
+
+
+def main_evidence(verdict):
+    return max(verdict.evidence, key=lambda item: SEVERITY_ORDER.index(item.severity), default=None)
+
+
+def confusion_matrix(rows):
+    tp = fp = tn = fn = abstained = labelled = 0
+    for row in rows:
+        verdict, sale = row["verdict"], row["sale"]
+        if verdict.decision == "ABSTENERSE":
+            abstained += 1
+            continue
+        if sale.label is None:
+            continue
+        labelled += 1
+        positive = verdict.decision in {"REVISAR", "RETENER"}
+        if sale.label == "mala" and positive:
+            tp += 1
+        elif sale.label == "buena" and positive:
+            fp += 1
+        elif sale.label == "buena":
+            tn += 1
+        else:
+            fn += 1
+    precision = tp / (tp + fp) if tp + fp else None
+    recall = tp / (tp + fn) if tp + fn else None
+    return {"tp": tp, "fp": fp, "tn": tn, "fn": fn, "precision": precision,
+            "recall": recall, "labelled": labelled, "abstained": abstained}
+
+
+def render_batch(request, results=None, report=None, confusion=None, error=None, status_code=200):
+    return templates.TemplateResponse(request=request, name="batch.html", status_code=status_code, context={
+        "results": results, "report": report, "confusion": confusion, "error": error,
+        "example_json": json.dumps(batch_example(), ensure_ascii=False, indent=2),
+        "catalog": load_config("catalog"),
+    })
+
+
+@app.get("/lote")
+def batch_form(request: Request):
+    return render_batch(request)
+
+
+@app.post("/lote")
+async def batch_submit(request: Request, payload: str = Form(""), file: UploadFile | None = File(None),
+                       demo: str = Form("")):
+    if demo:
+        content, filename = DEMO_PATH.read_text(encoding="utf-8"), None
+    elif file is not None and file.filename:
+        content, filename = await file.read(), file.filename
+    else:
+        content, filename = payload, None
+    if not content:
+        return render_batch(request, error="Pega un lote JSON/CSV o sube un archivo para procesar.", status_code=400)
+    sales, report = parse(content, filename)
+    verdicts = [await run_in_threadpool(evaluate_and_store, sale) for sale in sales]
+    state = store.load()
+    rows = [{"verdict": verdict, "sale": Sale.model_validate(state["sales"][verdict.sale_id]),
+             "main_rule": main_evidence(verdict)} for verdict in verdicts]
+    rows.sort(key=lambda item: item["verdict"].recoverable_per_minute, reverse=True)
+    confusion = confusion_matrix(rows) if any(row["sale"].label for row in rows) else None
+    return render_batch(request, results=rows, report=report, confusion=confusion)
 
 
 try:
