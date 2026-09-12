@@ -58,6 +58,12 @@ Láminas: `WIN-Reto03-Pitch-3min.pptx` · Guion hablado: `GUION-PITCH-3MIN.md`.
    - **Matriz de confusión**: contra las etiquetas `buena` / `mala`.
 3. Tocar el veredicto de Luis → sección 4 de esta guía.
 
+Alternativa con los nombres del **Anexo 1** del contrato (`promesa_declarada`,
+`velocidad_contratada`, `precio_mensual`, `forma_entrega_recibo`,
+`confirmacion_titular`): el lote de dos filas del README §4, que dispara `R31`
+(recibo físico no declarado: "99 soles todo incluido" y la factura llega en
+S/ 109). Es el mismo caso del gancho del pitch.
+
 ### Ruta completa (3 a 4 minutos): venta → veredicto → cliente → bandeja
 
 **Paso 1 · Una venta con un defecto (40 s)**
