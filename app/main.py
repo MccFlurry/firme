@@ -55,7 +55,7 @@ CONFIRMATION_LABELS = {"no_enviada": "No enviada", "enviada": "Pendiente", "no_r
                        "confirmada": "Confirmada", "confirmada_con_correccion": "Corrección solicitada",
                        "negada": "Servicio no reconocido"}
 templates.env.globals.update(decision_labels=DECISION_LABELS, confirmation_labels=CONFIRMATION_LABELS)
-templates.env.filters["plain"] = lambda text: re.sub(r"(?:[Ll]a regla |regla )?\bR\d{2}_[a-z_]+\s*:?\s*", "", text or "").replace("_", " ").replace("  ", " ")  # ponytail: hide rule ids and slugs from non-technical readers
+templates.env.filters["plain"] = lambda text: re.sub(r"(?:[Ll]a regla |regla )?\bR\d{2}_[a-z_]+\s*:?\s*", "", "" if text is None else str(text)).replace("_", " ").replace("  ", " ")  # ponytail: hide rule ids and slugs from non-technical readers
 
 
 def now():

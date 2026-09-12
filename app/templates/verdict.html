@@ -78,7 +78,7 @@
     <div class="section-heading"><h3>{{ evidence.rule_name }}</h3></div>
     <p>{% if 'unsupported_claims' in evidence['values'] %}La promesa contiene condiciones sin respaldo: {% for claim in evidence['values']['unsupported_claims'] %}{{ claim.text if claim is mapping else claim }}{% if not loop.last %}, {% endif %}{% endfor %}.{% else %}{{ evidence.message }}{% endif %}</p>
     <details><summary>Valores utilizados</summary>
-      <dl class="facts">{% for key, value in evidence['values'].items() %}<div><dt>{{ key|plain }}</dt><dd>{% if key == 'unsupported_claims' %}{% for claim in value %}<p>{% if claim is mapping %}{{ claim.text }} <span class="tag">origen: {{ claim.origen }}</span>{% else %}{{ claim }} <span class="tag">Léxico determinista</span>{% endif %}</p>{% endfor %}{% else %}{{ value if value is not none else 'Sin dato' }}{% endif %}</dd></div>{% endfor %}</dl>
+      <dl class="facts">{% for key, value in evidence['values'].items() %}<div><dt>{{ key|plain }}</dt><dd>{% if key == 'unsupported_claims' %}{% for claim in value %}<p>{% if claim is mapping %}{{ claim.text }} <span class="tag">origen: {{ claim.origen }}</span>{% else %}{{ claim|plain }} <span class="tag">Léxico determinista</span>{% endif %}</p>{% endfor %}{% else %}{{ value if value is not none else 'Sin dato' }}{% endif %}</dd></div>{% endfor %}</dl>
     </details>
   </article>
   {% else %}<p>No se dispararon reglas con los datos disponibles.</p>{% endfor %}
