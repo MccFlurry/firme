@@ -79,6 +79,10 @@ def build_facts(sale: Sale, ctx: Context, catalog: dict, settings=None, costs=No
                    if item["status"] in {"inexistente", "insostenible"}
                    and any(normalize(claim) in {normalize(alias) for alias in [item["text"], *item["aliases"]]}
                            for claim in promise.claims)]
+    known_claims = {normalize(alias) for item in lexicon["claims"] for alias in [item["text"], *item["aliases"]]}
+    if promise.source == "llm":
+        unsupported.extend({"text": claim, "origen": "IA"} for claim in dict.fromkeys(promise.claims)
+                           if normalize(claim) and normalize(claim) not in known_claims)
     facts.update(
         plan=plan_id, promo=promo_id, district=district, plan_exists=plan_id in plans,
         catalog_price=supported_price(plan, promo, promo_applies), catalog_speed=plan.get("speed_mbps"),

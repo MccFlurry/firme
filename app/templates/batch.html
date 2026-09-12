@@ -29,7 +29,7 @@
 <section class="panel">
   <div class="section-heading"><h2>Reporte de ingesta</h2><span class="count">{{ report.rows }} filas</span></div>
   <dl class="facts">
-    <div><dt>Mapeo de columnas</dt><dd>{% for column, field in report.mapped.items() %}<span class="tag">{{ column }} → {{ field }}</span> {% else %}Ninguna columna reconocida.{% endfor %}</dd></div>
+    <div><dt>Mapeo de columnas</dt><dd>{% for column, field in report.mapped.items() %}<span class="tag">{{ column }} → {{ field }}{% if column in report.mapped_by_ai %} · mapeado por IA{% endif %}</span> {% else %}Ninguna columna reconocida.{% endfor %}</dd></div>
     <div><dt>No reconocidas (a datos adicionales)</dt><dd>{{ report.unrecognized|join(', ') or 'Ninguna' }}</dd></div>
     <div><dt>Faltantes en el lote</dt><dd>{{ report.missing|join(', ') or 'Ninguno' }}</dd></div>
     <div><dt>Filas con error (omitidas)</dt><dd>{% for err in report.errors %}<span class="tag">{{ err }}</span> {% else %}Ninguna{% endfor %}</dd></div>
@@ -53,6 +53,11 @@
   </div>
 </section>
 {% endif %}
+<section class="panel">
+  <h2>Lectura del lote</h2>
+  <p class="hint">{{ reading.label }}{% if reading.model %} · {{ reading.model }}{% endif %}</p>
+  <p>{{ reading.text }}</p>
+</section>
 <section class="panel">
   <div class="section-heading"><h2>Resultados</h2><span class="count">{{ results|length }}</span></div>
   <p class="hint">Ordenadas por costo recuperable por minuto de revisión.</p>

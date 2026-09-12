@@ -1,14 +1,39 @@
 """Shared evaluation and persistence for sales and customer confirmation."""
 
 import secrets
+import threading
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from app import store
 from contracts.types import Confirmation, Context, Event, FieldEdit, Sale, Verdict
 from engine import evaluate
+from engine import llm
 from engine.llm import normalize_promise
 from engine.rules import load_config
+
+_EXPLANATION_LOCK = threading.Lock()
+
+
+def verdict_explanation(sale: Sale, verdict: Verdict) -> dict:
+    signature = {"expected_cost": verdict.expected_cost, "decision": verdict.decision,
+                 "evidence": [item.model_dump(mode="json") for item in verdict.evidence],
+                 "enabled": llm.describe()["provider"] != "determinista"}
+    # ponytail: one explanation at a time; per-sale locks if concurrent viewing grows.
+    with _EXPLANATION_LOCK:
+        cached = store.load().get("explanations", {}).get(sale.id, {})
+        if cached.get("signature") == signature:
+            return cached
+        text = llm.explain_verdict(sale, verdict)
+        result = {"signature": signature, "text": text, **llm.describe()}
+
+        def persist(data):
+            current = data["verdicts"].get(sale.id, {})
+            if all(current.get(key) == signature[key] for key in ("expected_cost", "decision", "evidence")):
+                data.setdefault("explanations", {})[sale.id] = result
+
+        store.update(persist)
+        return result
 
 
 def evaluate_and_store(sale: Sale, history: list[Sale] | None = None) -> Verdict:

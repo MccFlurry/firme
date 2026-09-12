@@ -199,21 +199,22 @@ def test_llm_success_and_timeout_fallback(monkeypatch):
         def __exit__(self, *args):
             pass
 
-        def parse(self, **kwargs):
+        def create(self, **kwargs):
             calls.append(kwargs)
-            return SimpleNamespace(parsed_output=kwargs["output_format"](plan="fibra_500", price=99.0))
+            return SimpleNamespace(content=[SimpleNamespace(
+                type="text", text='{"promises":[{"plan":"fibra_500","price":99.0}]}')])
 
     monkeypatch.setattr(llm.anthropic, "Anthropic", Client)
     promise, mode = normalize_promise("500 megas S/ 99.00", load_config("catalog"))
     assert mode == "llm" and promise.source == "llm"
     assert calls[0]["model"] == "claude-opus-5"
     assert calls[0]["output_config"] == {"effort": "low"}
-    assert calls[0]["max_tokens"] == 1024
+    assert calls[0]["max_tokens"] == 8192
 
     def fail(self, **kwargs):
         raise TimeoutError("offline")
 
-    monkeypatch.setattr(Client, "parse", fail)
+    monkeypatch.setattr(Client, "create", fail)
     promise, mode = normalize_promise("500 megas S/ 99.00", load_config("catalog"))
     assert mode == "determinista" and promise.price == 99.0
     text, mode = explain_for_client(sale(), promise)
@@ -329,11 +330,8 @@ def test_llm_empty_result_and_api_error_degrade(monkeypatch):
         def __exit__(self, *args):
             pass
 
-        def parse(self, **kwargs):
-            return SimpleNamespace(parsed_output=None)
-
         def create(self, **kwargs):
-            return SimpleNamespace(content=[SimpleNamespace(type="text", text="Texto de prueba")])
+            return SimpleNamespace(content=[SimpleNamespace(type="text", text='{"text":"Texto de prueba"}')])
 
     monkeypatch.setattr(llm.anthropic, "Anthropic", Client)
     promise, mode = normalize_promise("Plan 500 S/ 99.00", load_config("catalog"))

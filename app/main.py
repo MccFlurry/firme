@@ -2,7 +2,6 @@
 
 import json
 import math
-import os
 import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -17,8 +16,9 @@ from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException
 
 from app import store
-from app.services import evaluate_and_store
+from app.services import evaluate_and_store, verdict_explanation
 from contracts.types import Event, Sale, Verdict
+from engine import llm
 from engine.ingest import parse
 from engine.rules import load_config
 
@@ -185,11 +185,13 @@ def show_verdict(request: Request, sale_id: str):
     if sale_id not in state["verdicts"]:
         raise HTTPException(404, "Esta venta todavía no tiene una evaluación.")
     verdict = Verdict.model_validate(state["verdicts"][sale_id])
+    explanation = verdict_explanation(sale, verdict)
     confirmation = state["confirmations"].get(sale_id)
     return templates.TemplateResponse(request=request, name="verdict.html", context={
         "sale": sale, "verdict": verdict, "costs": load_config("costs"), "catalog": load_config("catalog"),
         "events": [item for item in state["events"] if item["sale_id"] == sale_id],
         "confirmation": confirmation,
+        "explanation": explanation,
         "confirmation_url": str(request.base_url) + "c/" + confirmation["token"] if confirmation else None,
     })
 
@@ -244,7 +246,8 @@ def complete_alert(sale_id: str):
 
 @app.get("/salud")
 def health():
-    return {"ok": True, "llm": "configurada" if os.getenv("ANTHROPIC_API_KEY") else "determinista"}
+    provider = llm.describe()
+    return {"ok": True, "llm": "configurada" if provider["model"] else "determinista", **provider}
 
 
 DEMO_PATH = Path(__file__).resolve().parent.parent / "data" / "cases.json"
@@ -295,9 +298,10 @@ def confusion_matrix(rows):
             "recall": recall, "labelled": labelled, "abstained": abstained}
 
 
-def render_batch(request, results=None, report=None, confusion=None, error=None, status_code=200):
+def render_batch(request, results=None, report=None, confusion=None, error=None, status_code=200, reading=None):
     return templates.TemplateResponse(request=request, name="batch.html", status_code=status_code, context={
         "results": results, "report": report, "confusion": confusion, "error": error,
+        "reading": reading,
         "example_json": json.dumps(batch_example(), ensure_ascii=False, indent=2),
         "catalog": load_config("catalog"),
     })
@@ -319,7 +323,13 @@ async def batch_submit(request: Request, payload: str = Form(""), file: UploadFi
         content, filename = payload, None
     if not content:
         return render_batch(request, error="Pega un lote JSON/CSV o sube un archivo para procesar.", status_code=400)
-    sales, report = parse(content, filename)
+    sales, report = await run_in_threadpool(parse, content, filename)
+    promises = await run_in_threadpool(
+        llm.normalize_promises, [sale.promise_text or "" for sale in sales], load_config("catalog"),
+    )
+    for sale, promise in zip(sales, promises):
+        if sale.promise_text:
+            sale.promise = promise
     state = store.load()
     # Rows without an id get one now, so every row can see the others in its history.
     taken = set(state["sales"]) | {sale.id for sale in sales if sale.id}
@@ -347,7 +357,12 @@ async def batch_submit(request: Request, payload: str = Form(""), file: UploadFi
              "main_rule": main_evidence(verdict)} for verdict in verdicts]
     rows.sort(key=lambda item: item["verdict"].recoverable_per_minute, reverse=True)
     confusion = confusion_matrix(rows) if any(row["sale"].label for row in rows) else None
-    return render_batch(request, results=rows, report=report, confusion=confusion)
+
+    def summarize():
+        return {"text": llm.summarize_batch(rows), **llm.describe()}
+
+    reading = await run_in_threadpool(summarize)
+    return render_batch(request, results=rows, report=report, confusion=confusion, reading=reading)
 
 
 try:

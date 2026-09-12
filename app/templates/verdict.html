@@ -17,7 +17,7 @@
   <p>La revisión se justifica cuando el costo esperado alcanza el costo de revisar; se retiene desde {{ costs.thresholds.retain_multiple }} veces ese costo o ante una evidencia bloqueante.</p>
   <p class="hint">Modelo de costos <span class="tag">{{ costs.origen }}</span> {{ costs.fuente }}</p>
 </section>
-<div class="notice" data-llm-mode="{{ verdict.llm_mode }}"><strong>{{ 'Capa LLM: activa' if verdict.llm_mode == 'llm' else 'Capa LLM: no disponible, comparador determinista' }}</strong><span> La decisión se calcula con las reglas y los costos configurados.</span></div>
+<div class="notice" data-llm-mode="{{ verdict.llm_mode }}"><strong>{{ 'Promesa extraída con IA' if verdict.llm_mode == 'llm' else 'Promesa: comparador determinista' }}</strong><span> La decisión se calcula con las reglas y los costos configurados.</span></div>
 <div class="two-columns">
   <section class="panel">
     <h2>Costo por desenlace</h2>
@@ -40,15 +40,20 @@
     {% else %}<p>La venta puede avanzar. No se requieren ajustes con la información disponible.</p>{% endif %}
   </section>
 </div>
+<section class="panel" id="explanation">
+  <h2>Por qué, en palabras</h2>
+  <p class="hint">{{ explanation.label }}{% if explanation.model %} · {{ explanation.model }}{% endif %}</p>
+  <p>{{ explanation.text }}</p>
+</section>
 <section class="panel" id="evidence">
   <div class="section-heading"><div><p class="eyebrow">Qué no coincide con qué</p><h2>Cadena de evidencia <span class="count">{{ verdict.evidence|length }}</span></h2></div><p>Severidad: <strong>{{ verdict.severity or 'sin señales' }}</strong> · Fuerza: <strong>{{ strength_labels.get(verdict.strength, 'sin señales') }}</strong></p></div>
   {% for evidence in verdict.evidence %}
   <article class="evidence" data-rule-id="{{ evidence.rule_id }}" data-origin="{{ evidence.origin }}">
     <div class="section-heading"><h3>{{ evidence.rule_name }} <span class="tag">{{ evidence.origin }}</span></h3><span class="tag">{{ evidence.severity }} × {{ strength_labels[evidence.strength] }}</span></div>
-    <p>{{ evidence.message }}</p>
+    <p>{% if 'unsupported_claims' in evidence['values'] %}La promesa contiene condiciones sin respaldo: {% for claim in evidence['values']['unsupported_claims'] %}{{ claim.text if claim is mapping else claim }}{% if not loop.last %}, {% endif %}{% endfor %}.{% else %}{{ evidence.message }}{% endif %}</p>
     <p class="hint"><code>{{ evidence.rule_id }}</code> · {{ {'promesa-catalogo': 'Promesa ↔ catálogo', 'promesa-registro': 'Promesa ↔ registro', 'catalogo-registro': 'Catálogo ↔ registro', 'registro-entrega': 'Registro ↔ entrega', 'identidad': 'Identidad', 'senal': 'Señal'}.get(evidence.edge, evidence.edge) }}</p>
     <details open><summary>Condición y valores utilizados</summary><pre>{{ evidence.condition }}</pre>
-      <dl class="facts">{% for key, value in evidence['values'].items() %}<div><dt>{{ key }}</dt><dd>{{ value if value is not none else 'Sin dato' }}</dd></div>{% endfor %}</dl>
+      <dl class="facts">{% for key, value in evidence['values'].items() %}<div><dt>{{ key }}</dt><dd>{% if key == 'unsupported_claims' %}{% for claim in value %}<p>{% if claim is mapping %}{{ claim.text }} <span class="tag">origen: {{ claim.origen }}</span>{% else %}{{ claim }} <span class="tag">Léxico determinista</span>{% endif %}</p>{% endfor %}{% else %}{{ value if value is not none else 'Sin dato' }}{% endif %}</dd></div>{% endfor %}</dl>
     </details>
     <p class="source"><strong>Fuente:</strong> {{ evidence.source }}</p>
   </article>

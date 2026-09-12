@@ -11,7 +11,7 @@ from starlette.exceptions import HTTPException
 from app import store
 from confirm import service
 from contracts.types import Promise, Sale
-from engine.llm import explain_for_client
+from engine.llm import describe, explain_for_client
 
 CONFIRM_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(CONFIRM_DIR / "templates"))
@@ -40,6 +40,7 @@ def _client_context(request: Request, sale_id: str, confirmation):
         "confirmation": confirmation,
         "text": text,
         "mode": mode,
+        "provider": describe(),
     }
 
 

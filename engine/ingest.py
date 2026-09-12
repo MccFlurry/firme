@@ -15,8 +15,17 @@ import json
 import math
 from collections.abc import Mapping
 
+from pydantic import Field
+
 from contracts.types import IngestReport, Sale
 from engine.facts import normalize
+from engine.llm import map_columns
+
+
+class SemanticIngestReport(IngestReport):
+    """Mapping provenance without changing the frozen ingestion contract."""
+
+    mapped_by_ai: dict[str, str] = Field(default_factory=dict)
 
 # canonical Sale field -> accepted column names (es/en, accents optional, snake/camel)
 FIELD_SYNONYMS = {
@@ -229,6 +238,16 @@ def parse(payload: str | bytes | list[dict], filename: str | None = None) -> tup
         else:
             unrecognized.append(column)
 
+    sample = {column: next((row[column] for row in raw_rows
+                           if isinstance(row, Mapping) and row.get(column) not in (None, "")), None)
+              for column in unrecognized}
+    mapped_by_ai = {}
+    for column, field in map_columns(unrecognized, sample).items():
+        if field not in mapped.values():
+            mapped[column] = field
+            mapped_by_ai[column] = field
+    unrecognized = [column for column in unrecognized if column not in mapped_by_ai]
+
     sales: list[Sale] = []
     errors: list[str] = []
     for index, row in enumerate(raw_rows, start=1):
@@ -263,8 +282,9 @@ def parse(payload: str | bytes | list[dict], filename: str | None = None) -> tup
         except Exception as exc:  # noqa: BLE001 — a batch must survive any row
             errors.append(f"Fila {index}: {exc}")
 
-    report = IngestReport(
+    report = SemanticIngestReport(
         mapped=mapped,
+        mapped_by_ai=mapped_by_ai,
         unrecognized=unrecognized,
         missing=[field for field in _MAPPABLE_FIELDS if field not in mapped.values()],
         rows=len(sales),

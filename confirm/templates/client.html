@@ -19,7 +19,7 @@
         <p class="eyebrow">WIN</p>
         <h1>¿Es esto lo que acordaste?</h1>
         <p class="offer">{{ text }}</p>
-        <p class="hint">{{ 'Capa LLM: activa' if mode == 'llm' else 'Capa LLM: no disponible, comparador determinista' }}</p>
+        <p class="hint">{{ provider.label }}{% if provider.model %} · {{ provider.model }}{% endif %}</p>
       </section>
       <button class="button big" type="submit" name="status" value="confirmada">Sí, es lo que acordé</button>
       <section class="panel">
