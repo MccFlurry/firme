@@ -37,6 +37,10 @@ un defecto (p. ej. promesa con "velocidad garantizada"). Enviar → `GET
   costo de cada desenlace.
 - La **cadena de evidencia**: qué regla, qué condición, qué valores la dispararon,
   de qué fuente sale, con su etiqueta `origen` (SUPUESTO_DEMO / PÚBLICO).
+- El **claim sin respaldo marcado `origen: IA`** en la cadena de evidencia, que
+  alimenta la regla R23 (promesa insostenible).
+- La explicación **"Por qué, en palabras"**: la IA redacta el porqué citando solo
+  las reglas y los valores que se dispararon.
 - El **contrafáctico**: "si el campo X fuera Y, esta venta pasaría".
 - La línea que lo ancla: el corte no se elige a dedo; es donde el costo esperado
   supera el costo de revisar.
@@ -50,8 +54,11 @@ desconocido) o tocar "Cargar los 25 casos de demo".
 
 **Qué se muestra y se dice:**
 
-- El **reporte de ingesta**: columnas mapeadas, no reconocidas y faltantes. La
-  ingesta tolera esquemas ajenos y **no se cae** con filas corruptas.
+- El **reporte de ingesta**: columnas mapeadas, no reconocidas y faltantes, con
+  las columnas ajenas que la IA mapea (`mapeado por IA`). La ingesta tolera
+  esquemas ajenos y **no se cae** con filas corruptas.
+- La **"Lectura del lote"**: resumen que redacta la IA con los patrones
+  transversales y la prioridad de revisión.
 - La tabla ordenada por **costo recuperable por minuto de revisión**, no por
   score.
 - La **matriz de confusión** contra las etiquetas del lote (positivo = REVISAR o
@@ -113,8 +120,8 @@ En un **segundo teléfono** (o en el del jurado) se abre `GET
 
 ## Ruta de respaldo si no hay red
 
-La demo **no depende de la red**: la capa LLM degrada a comparador determinista y
-lo dice en pantalla.
+La demo **no depende de la red**: la capa de IA degrada a comparador determinista
+y lo dice en pantalla.
 
 - **Servidor local:** `.venv/bin/uvicorn app.main:app` y abrir
   `http://localhost:8000` (o exponer el portátil como punto de acceso).
@@ -124,6 +131,9 @@ lo dice en pantalla.
   segundo teléfono conectado al punto de acceso del portátil.
 - **Sin `ANTHROPIC_API_KEY`:** todo funciona; la pantalla indica "Capa LLM: no
   disponible, comparador determinista".
+- **Sin clave de IA (`OPENCODE_API_KEY` / `ANTHROPIC_API_KEY`) o con
+  `LLM_DISABLE=1`:** todo funciona igual; la pantalla indica "IA no disponible:
+  comparador determinista".
 
 Orden de repliegue si algo se cae: lote local → formulario manual → bandeja.
 Nunca se detiene la demo para recuperar la red.

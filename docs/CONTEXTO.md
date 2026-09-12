@@ -68,10 +68,13 @@ No se reabren. Cada una con su porqué.
 - **Contrato congelado en `contracts/types.py`:** nadie lo edita sin avisar a
   los otros; los entrypoints públicos del motor son `engine.evaluate`,
   `engine.ingest.parse` y `engine.llm.normalize_promise`.
-- **LLM opcional** (SDK `anthropic`, `claude-opus-5`, `output_format=...`,
-  timeout 10 s): sin clave, sin red o ante excepción, degrada a comparador
-  determinista y lo dice en pantalla (`llm_mode`). La demo nunca depende de una
-  llamada externa.
+- **Capa de IA** (proveedor **OpenCode Go**, endpoint compatible con OpenAI en
+  `https://opencode.ai/zen/go/v1`, modelo por defecto `deepseek-v4-flash`;
+  alternativa `ANTHROPIC_API_KEY` con `claude-opus-5`): prioridad Anthropic →
+  OpenCode Go → comparador determinista. Sin clave (`OPENCODE_API_KEY` /
+  `ANTHROPIC_API_KEY`), sin red, con `LLM_DISABLE=1` o ante excepción, degrada a
+  comparador determinista y lo dice en pantalla (`llm_mode`). La IA extrae, mapea
+  y explica; **nunca decide**. La demo nunca depende de una llamada externa.
 - **Ventana de diseño** (`install_window_hours: 48`, `confirmation_window_hours:
   24`, `alert_buffer_hours: 12`): toda la arquitectura se justifica contra el
   tiempo entre venta e instalación, no contra la exactitud teórica.
@@ -99,6 +102,11 @@ No se reabren. Cada una con su porqué.
 | Casos sintéticos etiquetados | `data/cases.json` |
 | Tipos compartidos | `contracts/types.py` |
 | Estado en ejecución | `data/state.json` |
+
+En `data/state.json`, además de `sales`, `verdicts`, `events` y `confirmations`,
+vive `state['explanations']`: el caché de las explicaciones "Por qué, en
+palabras" por venta, invalidado por la firma de la evidencia (decisión, costo
+esperado y cadena de evidencia).
 
 ---
 
@@ -144,8 +152,8 @@ solo el despliegue a una URL pública, pendiente de crear la cuenta de hosting.*
   - `contracts/types.py` (congelado) y `app/store.py` (JSON + lock de proceso).
   - Motor (`engine/`): `evaluate`, facts, 29 reglas en `config/rules.yaml`
     (seis aristas del rombo + señales), costo esperado (noisy-OR), decisión,
-    contrafáctico, LLM opcional con degradación determinista e ingesta tolerante
-    (`engine.ingest.parse`).
+    contrafáctico, capa de IA (OpenCode Go) con degradación determinista e
+    ingesta tolerante (`engine.ingest.parse`).
   - Config (`config/*.yaml`): catálogo, reglas, costos, léxico y ventanas, todo
     `SUPUESTO_DEMO`.
   - Web (`app/`): formulario, veredicto, edición, lote, bandeja y salud.
@@ -154,7 +162,8 @@ solo el despliegue a una URL pública, pendiente de crear la cuenta de hosting.*
   - `data/cases.json`: 25 casos sintéticos etiquetados (12 "buena", 13 "mala",
     varios de borde).
   - Despliegue listo: `Dockerfile`, `render.yaml`, `fly.toml`.
-  - Tests: 52 verdes (`tests/test_engine.py`, `tests/test_ingest.py`).
+  - Tests: 65 verdes (`tests/test_engine.py`, `tests/test_ingest.py`,
+    `tests/test_llm.py`, `tests/test_app.py`).
 - **A medias:** —
 - **No empezado / pendiente:** despliegue a URL pública (falta la cuenta de
   hosting); edición de

@@ -79,6 +79,8 @@ No se cae con columnas desconocidas ni con filas corruptas: las reporta y sigue.
   la ingesta tolerante, el cálculo de costo esperado, el contrafáctico, el flujo
   de confirmación por enlace y la bandeja de avisos. Todo funciona de punta a
   punta con datos que el propio jurado ingresa.
+- La capa de IA (extracción, mapeo, redacción y resumen) corre de verdad con
+  OpenCode Go; ver *IA aplicada*.
 
 **Simulado — nunca se presenta como dato real de WIN:**
 
@@ -90,6 +92,36 @@ No se cae con columnas desconocidas ni con filas corruptas: las reporta y sigue.
   cada regla que se dispara.
 
 No hay ningún dato sintético presentado como real.
+
+---
+
+## IA aplicada
+
+La capa de IA está implementada y corre de verdad: proveedor **OpenCode Go**
+(endpoint compatible con OpenAI en `https://opencode.ai/zen/go/v1`), modelo por
+defecto `deepseek-v4-flash`. La IA **extrae, mapea y explica; nunca decide por sí
+sola**: la decisión sigue saliendo del motor de reglas y del costo esperado, de
+modo que la explicabilidad es estructural y no depende del modelo.
+
+Se usa en cinco puntos, siempre **una llamada por lote, nunca por fila**, con la
+explicación por veredicto cacheada:
+
+1. **Normaliza la promesa** en lenguaje natural a estructura (plan, precio,
+   velocidad, promoción, plazo) y detecta **claims sin respaldo en el catálogo**
+   más allá del léxico. Esos claims se marcan `origen IA` y alimentan la regla
+   `R23` (promesa insostenible).
+2. **Mapea columnas desconocidas** del lote del jurado a campos conocidos; en el
+   reporte de ingesta aparecen como `mapeado por IA`.
+3. **Redacta "Por qué, en palabras"** en cada veredicto, citando solo las reglas
+   y los valores que realmente se dispararon; la salida se valida contra la
+   evidencia y se rechazan reglas o números que no estén en ella.
+4. **"Lectura del lote"**: resumen del lote con patrones transversales y la
+   prioridad de revisión.
+5. **Texto en lenguaje llano para el cliente** en el enlace de confirmación.
+
+Sin clave o sin red nada se cae: el sistema degrada al comparador determinista y
+la interfaz lo indica ("IA no disponible: comparador determinista"). Ver
+*Variables de entorno*.
 
 ---
 
@@ -147,10 +179,17 @@ sobreviva a reinicios, monta un volumen en esa ruta.
 
 ## Variables de entorno
 
-- `ANTHROPIC_API_KEY` — **opcional**. Si está definida, la capa LLM normaliza la
-  promesa y redacta la explicación al cliente. Sin ella (o sin red, o ante
-  cualquier error) el sistema degrada a un comparador determinista y **lo dice en
-  pantalla**. Ninguna llamada externa es obligatoria.
+- `OPENCODE_API_KEY` — **opcional**. Clave del proveedor OpenCode Go. En local
+  también se lee de `~/.local/share/opencode/auth.json`.
+- `LLM_MODEL` — **opcional**. Modelo de OpenCode Go; por defecto
+  `deepseek-v4-flash`.
+- `ANTHROPIC_API_KEY` — **opcional**. Alternativa (modelo `claude-opus-5`); tiene
+  prioridad sobre OpenCode Go.
+- `LLM_DISABLE=1` — apaga la IA por completo.
+
+Prioridad: Anthropic → OpenCode Go → comparador determinista. Sin clave, sin red
+o ante cualquier error, el sistema degrada al comparador determinista y **lo dice
+en pantalla**. Ninguna llamada externa es obligatoria.
 
 ## Gates
 
