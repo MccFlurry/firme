@@ -1,18 +1,18 @@
-# Guion de demo — Firme (5 minutos)
+# Guion de demo — WIN (5 minutos)
 
 Objetivo: que el jurado abra el prototipo en su teléfono, le dé un lote que nunca
 vimos, y vea cómo el sistema lo separa y lo explica. Cinco minutos cronometrados,
 en bloques de 30–60 segundos. Al final, la ruta de respaldo sin red.
 
-Marca `SIMULADO` visible en todas las pantallas: se menciona una vez al inicio y
-no se vuelve a justificar.
+Datos sintéticos en todas las pantallas: se menciona una vez al inicio y no se
+vuelve a justificar.
 
 ---
 
 ## Bloque 1 · La pregunta y la tesis — 0:00–0:40 (40 s)
 
-**En pantalla:** `GET /` (formulario "Nueva venta", móvil primero). Se señala la
-marca de agua `SIMULADO` y el pie con el encuadre.
+**En pantalla:** `GET /` (formulario "Nueva venta", móvil primero). Se señala el
+logo de WIN y el pie con el encuadre.
 
 **Qué se dice:**
 

@@ -1,4 +1,4 @@
-"""Firme's mobile-first sale, verdict and alert screens."""
+"""WIN's mobile-first sale, verdict and alert screens."""
 
 import json
 import math
@@ -23,7 +23,7 @@ from engine.ingest import parse
 from engine.rules import load_config
 
 APP_DIR = Path(__file__).resolve().parent
-app = FastAPI(title="Firme", docs_url=None, redoc_url=None)
+app = FastAPI(title="WIN · Calidad de venta", docs_url=None, redoc_url=None)
 templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
 

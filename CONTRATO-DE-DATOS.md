@@ -1,8 +1,8 @@
 # Contrato de datos
 
-Firme · Hackatón WIN Chiclayo 2026 · Reto 03
+WIN · Hackatón Chiclayo 2026 · Reto 03
 
-Documento de nivel producción: describe qué campos necesita Firme para operar,
+Documento de nivel producción: describe qué campos necesita el sistema para operar,
 de qué sistema salen, con qué frecuencia, y qué pasa si no están. No es una lista
 de deseos: por cada campo ausente se especifica el modo de degradación.
 
@@ -101,7 +101,7 @@ puntuales y se declara en pantalla como campos faltantes.
 
 ## 4. Minimización de datos personales
 
-Firme no necesita ver los datos completos de una persona para detectar que
+El sistema no necesita ver los datos completos de una persona para detectar que
 una promesa no se sostiene. Pedimos lo mínimo y seudonimizamos lo que se puede.
 
 **Qué pedimos y por qué:**
@@ -137,7 +137,7 @@ Redactado como recomendación de arquitectura de información, no como queja.
 
 El arco del reto va del primer contacto a la primera factura, pero hoy esos
 momentos viven en sistemas distintos que no se hablan. Para que cualquier
-sistema de calidad de venta —no solo Firme— pueda operar, WIN necesita
+sistema de calidad de venta —no solo esta propuesta— pueda operar, WIN necesita
 exponer tres hechos que hoy probablemente no están disponibles como eventos:
 
 1. **La promesa, como dato y no como nota.** Lo que se le dijo al cliente debe

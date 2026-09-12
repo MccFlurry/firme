@@ -40,7 +40,7 @@ promos:
     applies_to: [fibra_750, fibra_850, fibra_1000]
     months: 1
     origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, promociones de demostración."
+    fuente: "Plan del equipo (T1), promociones de demostración."
   descuento_3m:
     name: S/ 20 de descuento por 3 meses
     aliases: [descuento de 20 soles por 3 meses, descuento por 3 meses, descuento 3m]
@@ -48,32 +48,32 @@ promos:
     discount: 20
     months: 3
     origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, promociones de demostración."
+    fuente: "Plan del equipo (T1), promociones de demostración."
 coverage:
   chiclayo_centro:
     tech: [fibra]
     max_speed_mbps: 1000
     origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, cobertura sintética."
+    fuente: "Plan del equipo (T1), cobertura sintética."
   la_victoria:
     tech: [fibra]
     max_speed_mbps: 850
     origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, cobertura sintética."
+    fuente: "Plan del equipo (T1), cobertura sintética."
   jose_leonardo_ortiz:
     tech: [fibra]
     max_speed_mbps: 500
     origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, cobertura sintética."
+    fuente: "Plan del equipo (T1), cobertura sintética."
   pimentel:
     tech: [inalambrico]
     max_speed_mbps: 50
     origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, cobertura sintética."
+    fuente: "Plan del equipo (T1), cobertura sintética."
   monsefu:
     tech: []
     max_speed_mbps: 0
     origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, cobertura sintética."
+    fuente: "Plan del equipo (T1), cobertura sintética."
 price_tolerance: 0.02
 install_sla_days: 3

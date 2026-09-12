@@ -1,6 +1,4 @@
-# Firme
-
-**Que lo prometido sea lo entregado.**
+# Que lo prometido sea lo entregado — WIN · Reto 03
 
 Hackatón WIN Chiclayo 2026 · Reto 03 · Área dueña: Calidad de venta.
 
@@ -20,7 +18,7 @@ Hackatón WIN Chiclayo 2026 · Reto 03 · Área dueña: Calidad de venta.
 
 ## 2. Nuestra respuesta, en tres frases
 
-Firme trata la **promesa** como objeto de primera clase: en lugar de puntuar
+La propuesta trata la **promesa** como objeto de primera clase: en lugar de puntuar
 la venta registrada, compara cuatro representaciones de la misma venta —lo que se
 prometió, el catálogo vigente, lo que quedó registrado y lo que se va a entregar—
 y cada desacuerdo entre dos de ellas es un defecto que se explica con nombres y
@@ -85,7 +83,7 @@ No se cae con columnas desconocidas ni con filas corruptas: las reporta y sigue.
 **Simulado — nunca se presenta como dato real de WIN:**
 
 - Todos los datos personales (nombres, documentos, teléfonos, correos,
-  direcciones) son generados. Marca de agua `SIMULADO` en todas las pantallas.
+  direcciones) son generados.
 - El catálogo de planes, promos, precios y cobertura, los costos de cada
   desenlace, los priors y las ventanas viven en `config/*.yaml`, marcados
   `origen: SUPUESTO_DEMO` con su fuente. La interfaz muestra ese origen junto a
@@ -139,7 +137,7 @@ Abre `http://127.0.0.1:8000`.
 
 ## Cómo desplegar
 
-- **Docker:** `docker build -t firme .` y `docker run -p 8000:8000 firme`.
+- **Docker:** `docker build -t win-reto03 .` y `docker run -p 8000:8000 win-reto03`.
 - **Render:** el repo incluye `render.yaml` (servicio web free, runtime Docker,
   health check en `/salud`).
 - **Fly.io:** el repo incluye `fly.toml`; ejecuta `fly deploy`.

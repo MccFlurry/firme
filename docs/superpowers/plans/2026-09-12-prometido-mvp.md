@@ -410,3 +410,78 @@ Los nueve bloqueantes del §6 del prompt maestro, verificados ejecutando. Ademá
 Workers: no commitear, no salir del alcance, no instalar dependencias fuera de
 `requirements.txt` (si hace falta una, anotarla en el reporte y usar stdlib). Reporte final:
 qué archivos tocaste, gates con salida, y qué quedó fuera.
+
+---
+
+## Adendum 2026-09-12 (tarde) — pedido del usuario: sin nombre, sin marca de agua, con IA real
+
+### T8 · Rebrand: solo el logo de WIN, sin "Firme" ni "SIMULADO" — carril `opencode-worker` (deepseek-v4-pro)
+Por qué: mecánico sobre ~25 archivos con juicio de redacción; hay patrón (los templates existentes).
+
+- [ ] `app/templates/base.html`, `confirm/templates/client.html`, `confirm/templates/done.html`: quitar
+  el `<span class="watermark">SIMULADO</span>` y el brand-mark "F"/"Firme". El header muestra el logo
+  `/static/win-logo.png` (alto 40–44 px), el tagline "Que lo prometido sea lo entregado" y el badge de
+  texto "Hackatón WIN Chiclayo 2026 · Reto 03". `app/static/app.css`: quitar `.watermark`; ajustar
+  `.brand` para el logo. `<title>`: "… · WIN". Pie: una línea "Demostración con datos sintéticos;
+  supuestos y fuentes visibles en cada evaluación." (sin la palabra SIMULADO).
+- [ ] `app/main.py`: `FastAPI(title="WIN · Calidad de venta")`. `render.yaml` name y `fly.toml` app:
+  `win-reto03`. `README.md`: título "# Que lo prometido sea lo entregado — WIN · Reto 03"; toda mención
+  a "Firme" pasa a "la propuesta" / "el sistema". Mismo criterio en `docs/*.md`, `CONTRATO-DE-DATOS.md`
+  y en las cadenas `fuente:` de `config/*.yaml` ("Plan del equipo (T1)…"). Encabezado de docs:
+  "WIN · Hackatón Chiclayo 2026 · Reto 03". No tocar `contracts/`, `engine/`, `tests/`, `data/`.
+- [ ] Verificar: `rtk proxy grep -rn 'Firme\|SIMULADO' --exclude-dir=.venv --exclude-dir=.git .` devuelve solo
+  este plan; gates verdes.
+
+### T9 · Capa de IA real con OpenCode Go — carril `codex-worker` (gpt-6-astra, xhigh)
+Por qué: integración sin patrón, con degradación y latencia que cuidar.
+
+**Proveedor:** OpenAI-compatible en `https://opencode.ai/zen/go/v1/chat/completions`. Cabeceras:
+`Authorization: Bearer <key>`, `x-opencode-session: <uuid estable por proceso>` (sin ella responde
+`MissingSessionID`). Clave: env `OPENCODE_API_KEY`; si no está, leer `~/.local/share/opencode/auth.json`
+→ `["opencode-go"]["key"]` (comodidad local; nunca commitear la clave). Modelo por defecto
+`deepseek-v4-flash` (env `LLM_MODEL`); `response_format: {"type": "json_object"}` funciona;
+`temperature: 0`; latencia observada 9–11 s por llamada (razona internamente), por eso **una llamada por
+lote, nunca una por fila**. Timeout 25 s. Cliente con `httpx` (ya instalado). Mantener el camino
+Anthropic solo si `ANTHROPIC_API_KEY` está definido; prioridad: Anthropic → OpenCode → determinista.
+`llm_mode` sigue siendo `"llm" | "determinista"`; agregar en `Verdict`… no: el contrato está congelado;
+exponer el nombre del proveedor/modelo por `GET /salud` y en la UI con un texto "IA: DeepSeek (OpenCode
+Go)" leído desde `engine.llm.describe()`.
+
+Dónde aplica la IA (todas con salida verificable y degradación determinista):
+1. **Promesa → estructura + claims semánticos** (`normalize_promises(texts: list[str], catalog) ->
+   list[Promise]`, una llamada por lote; `normalize_promise` delega a ella con lista de uno). El prompt
+   pide, además de plan/velocidad/precio/promo/plazo, `claims`: toda promesa que el catálogo no respalda
+   (velocidad garantizada, sin contrato, precio congelado, instalación hoy/mañana sin falta, gratis para
+   siempre, equipos extra). `facts.unsupported_claims` debe incluir los claims del LLM que no estén en
+   el lexicon marcándolos como `origen: IA`; R23 sigue disparando. Los claims del lexicon se mantienen
+   como red determinista.
+2. **Mapeo semántico de columnas** (`map_columns(unrecognized: list[str], sample_row: dict) ->
+   dict[str, str]`): solo cuando `IngestReport.unrecognized` no está vacío; una llamada por lote; el LLM
+   propone campo de `Sale` para cada columna desconocida ("Nro. Cel. Titular" → `phone`); la ingesta
+   aplica el mapeo y lo reporta como "mapeado por IA" en la vista de lote.
+3. **Explicación del veredicto** (`explain_verdict(sale, verdict) -> str`): 2–3 frases en español que
+   citan solo la evidencia disparada (regla, valores) y la decisión; prohibido inventar hechos. Se genera
+   al ver `GET /ventas/{id}` la primera vez y se guarda en `state["explanations"][sale_id]` (recalcular
+   si cambia el veredicto: comparar `expected_cost` y `decision`). La UI la muestra arriba de la cadena
+   de evidencia como "Por qué, en palabras" con la etiqueta del proveedor.
+4. **Resumen del lote** (`summarize_batch(rows) -> str`): una llamada tras `POST /lote`, con la tabla
+   compacta (id, decisión, costo, reglas): patrones transversales (mismo vendedor, teléfonos
+   compartidos, direcciones repetidas), qué revisar primero y por qué. Se muestra arriba de la tabla.
+5. **Texto al cliente** (`explain_for_client`, ya existe): usar el mismo proveedor.
+
+- [ ] `engine/llm.py`: cliente único (`_chat(messages, json=True) -> dict|None`), sesión uuid por
+  proceso, prioridad de proveedores, `describe()`; nunca lanza; log a stderr en fallo.
+- [ ] `engine/facts.py`: incorporar claims IA a `unsupported_claims` sin romper tests.
+- [ ] `engine/ingest.py` + `app/main.py`: mapeo semántico opcional y reporte "por IA"; una llamada de
+  normalización por lote (pasar `promise` ya normalizada a `evaluate_and_store` para que no vuelva a
+  llamar); resumen del lote; explicación en veredicto; `GET /salud` con proveedor y modelo.
+- [ ] Templates: bloques "Por qué, en palabras" (verdict.html) y "Lectura del lote" (batch.html), con la
+  etiqueta del proveedor; si no hay IA, el bloque dice "IA no disponible: comparador determinista".
+- [ ] Tests (`tests/test_llm.py`, con `monkeypatch` del cliente HTTP, sin red): prioridad de proveedores,
+  degradación ante timeout/JSON inválido, claims IA llegan a R23, mapeo semántico aplicado.
+- [ ] Verificación con computer-use al final (viewport móvil): formulario con promesa "Fibra 850 a
+  S/ 59.50, velocidad garantizada y el precio nunca sube" → R23 con claim "el precio nunca sube" marcado
+  IA; lote pegado con columnas raras ("Nro. Cel. Titular", "Tarifa mensual") → mapeadas por IA; resumen
+  del lote visible; veredicto con "Por qué, en palabras"; `/salud` con el modelo. Y sin clave
+  (`OPENCODE_API_KEY=` vacío y auth.json inaccesible por env `LLM_DISABLE=1`) todo sigue funcionando
+  y lo dice en pantalla.

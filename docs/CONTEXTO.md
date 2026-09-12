@@ -1,6 +1,6 @@
 # Contexto del proyecto
 
-Firme · Hackatón WIN Chiclayo 2026 · Reto 03
+WIN · Hackatón Chiclayo 2026 · Reto 03
 
 Este documento es el artefacto de traspaso: lo primero que se le da a cualquier
 persona o modelo que entra a mitad de camino. Se actualiza al cerrar cada fase.
@@ -12,7 +12,7 @@ despliegue a una URL pública.**
 
 ## 1. Qué es esto y qué pregunta responde
 
-Firme responde a la pregunta del reto: ¿cómo verificamos que cada venta fue
+La propuesta responde a la pregunta del reto: ¿cómo verificamos que cada venta fue
 hecha como debe ser —con el cliente correcto y con la promesa correcta— antes de
 que se convierta en instalación, factura y problema?
 
@@ -58,8 +58,8 @@ No se reabren. Cada una con su porqué.
 - **Idioma dividido:** UI en español neutro profesional; código, identificadores,
   archivos y comentarios en inglés. El jurado es hispanohablante y el código es
   para el equipo.
-- **Marca `SIMULADO` en todas las pantallas:** cero datos reales de personas;
-  todo caso es sintético.
+- **Solo datos sintéticos:** cero datos reales de personas; todo caso es
+  sintético.
 - **Reglas, catálogo, costos y umbrales en `config/*.yaml`**, cada ítem con
   `origen: SUPUESTO_DEMO | PUBLICO` y `fuente`: nunca inventar política
   comercial de WIN; la UI muestra el origen junto a cada regla disparada.

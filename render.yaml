@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: firme
+    name: win-reto03
     runtime: docker
     plan: free
     healthCheckPath: /salud

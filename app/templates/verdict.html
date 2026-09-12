@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ sale.id }} · {{ verdict.decision }} · Firme{% endblock %}
+{% block title %}{{ sale.id }} · {{ verdict.decision }} · WIN{% endblock %}
 {% block content %}
 <div class="section-heading page-heading">
   <div><p class="eyebrow">Evaluación · {{ sale.id }}</p><h1>{{ sale.customer_name or 'Cliente sin nombre' }}</h1><p>{{ catalog.plans.get(sale.plan, {}).get('name', sale.plan) or 'Plan sin indicar' }} · {{ sale.seller_id or 'Vendedor sin indicar' }}</p></div>
