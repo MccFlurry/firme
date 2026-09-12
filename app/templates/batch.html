@@ -3,8 +3,8 @@
 {% block content %}
 <div class="page-heading">
   <p class="eyebrow">Pega o sube un lote</p>
-  <h1>Ingesta tolerante de un lote de ventas</h1>
-  <p>El sistema reconoce columnas en español o inglés, con o sin tildes, y las mapea a los campos conocidos. Las filas rotas se omiten y se reportan; nunca se pierde el lote por una fila.</p>
+  <h1>Revisa tus ventas en un solo paso.</h1>
+  <p>Sube tu lote y descubre qué ventas pueden avanzar y cuáles necesitan atención. Reconocemos columnas en español o inglés; si una fila tiene errores, te los mostramos y seguimos con las demás.</p>
 </div>
 {% if error %}<div class="notice error" role="alert"><strong>No se procesó el lote.</strong> {{ error }}</div>{% endif %}
 <section class="panel">
@@ -18,7 +18,7 @@
       <button class="button" type="submit">Procesar lote <span aria-hidden="true">→</span></button>
       <button class="button secondary" type="submit" name="demo" value="1">Cargar los 25 casos de demo</button>
     </div>
-    <p class="hint">El botón de demo usa <code>data/cases.json</code>. El ejemplo de abajo usa un esquema distinto al nuestro para probar el mapeo.</p>
+    <p class="hint">Prueba con 25 ventas sintéticas o usa el ejemplo de abajo para ver cómo reconocemos columnas con otros nombres.</p>
   </form>
   <details class="panel"><summary>Ejemplo listo para pegar (5 filas, columnas en inglés)</summary>
     <pre id="batch-example-pre">{{ example_json }}</pre>
@@ -39,7 +39,7 @@
 <section class="panel">
   <h2>Matriz de confusión</h2>
   <p class="hint">Positivo = decisión REVISAR o RETENER sobre las filas etiquetadas. Las abstenciones se cuentan aparte.</p>
-  <div class="table-scroll"><table>
+  <div class="table-scroll" tabindex="0" role="region" aria-label="Matriz de confusión"><table>
     <thead><tr><th></th><th>Predijo positivo</th><th>Predijo negativo</th></tr></thead>
     <tbody>
       <tr><th scope="row">Etiqueta mala</th><td>{{ confusion.tp }}</td><td>{{ confusion.fn }}</td></tr>

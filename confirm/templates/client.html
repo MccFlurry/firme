@@ -3,24 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#163d38">
+  <meta name="theme-color" content="#ff5a0a">
   <title>Confirma tu servicio · Firme</title>
   <link rel="stylesheet" href="/static/app.css">
-  <style>
-    body { display: grid; place-items: center; min-height: 100vh; padding: 1rem; }
-    .client { width: 100%; max-width: 520px; }
-    .client h1 { font-size: 1.9rem; margin: .4rem 0 .8rem; }
-    .offer { font-size: 1.05rem; }
-    .big { width: 100%; min-height: 58px; font-size: 1.05rem; margin-top: .75rem; white-space: normal; }
-    .big.danger { background: #912e29; border-color: #912e29; }
-    .big.danger:hover { background: #7c2621; }
-    .client textarea { min-height: 96px; }
-    .client-meta { font-size: .78rem; color: var(--muted); text-align: center; margin-top: 1.4rem; }
-  </style>
 </head>
-<body>
+<body class="client-page">
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
   <span class="watermark">SIMULADO</span>
-  <main class="client">
+  <header class="site-header client-header">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">F</span><span>Firme<small>Que lo prometido sea lo entregado</small></span></div>
+    <p class="hackathon-badge"><img class="win-logo" src="/static/win-logo.png" alt="WIN" width="103" height="43"><span>Hackatón WIN Chiclayo 2026 · Reto 03</span></p>
+  </header>
+  <main class="client" id="contenido" tabindex="-1">
     <form method="post" action="/c/{{ confirmation.token }}">
       <section class="panel">
         <p class="eyebrow">Firme</p>

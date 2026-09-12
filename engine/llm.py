@@ -75,7 +75,8 @@ def explain_for_client(sale: Sale, promise: Promise) -> tuple[str, LlmMode]:
     price_text = f"S/ {price:.2f}/mes" if price is not None else "precio por confirmar"
     promo_id = promise.promo or sale.promo
     promo = catalog["promos"].get(promo_id, {}).get("name", promo_id) or "sin promoción indicada"
-    installation = (f"en {promise.install_days} días" if promise.install_days is not None else sale.install_date) or "por confirmar"
+    days = promise.install_days
+    installation = (f"en {days} día{'s' if days != 1 else ''}" if days is not None else sale.install_date) or "por confirmar"
     text = (f"Hola {sale.customer_name or 'cliente'}. {sale.seller_id or 'Tu vendedor'} te ofreció: "
             f"{plan} a {price_text}, {promo}. Instalación: {installation}. ¿Es esto lo que acordaste?")
     if os.getenv("ANTHROPIC_API_KEY"):

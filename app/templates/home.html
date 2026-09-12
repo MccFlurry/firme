@@ -25,8 +25,9 @@
   <form class="sale-form" id="sale-form" action="{{ '/ventas/' ~ sale.id ~ '/editar' if sale else '/ventas' }}" method="post" data-editing="{{ 'true' if sale else 'false' }}">
     <section class="panel">
       <div class="section-heading"><h2><span class="step">01</span> Lo acordado</h2>{% if not sale %}<button class="button secondary" type="button" id="load-example">Cargar ejemplo</button>{% endif %}</div>
+      {% if not sale %}<p class="hint" id="example-status" role="status"></p>{% endif %}
       <label for="promise-text">Lo que se ofreció al cliente</label>
-      <textarea id="promise-text" name="promise_text" rows="4" maxlength="10000" placeholder="Ej.: Fibra 200 Mbps a S/ 79.90 al mes. Instalación en 1 día." aria-describedby="promise-help">{{ values.get('promise_text') or '' }}</textarea>
+      <textarea id="promise-text" name="promise_text" rows="4" maxlength="10000" placeholder="Ej.: Fibra 500 Mbps a S/ 99.00 al mes. Instalación en 1 día." aria-describedby="promise-help">{{ values.get('promise_text') or '' }}</textarea>
       <p class="hint" id="promise-help">Escribe la promesa tal como se explicó al cliente. Se extraerán el plan, el precio y las condiciones que puedan reconocerse.</p>
       <div class="fields">
         {{ input('seller_id', placeholder='Ej.: VEN-001') }}
@@ -81,7 +82,6 @@
     <ol><li>Qué coincide y qué necesita revisión.</li><li>La regla, sus valores y su fuente.</li><li>El costo esperado en soles.</li><li>Qué ajuste podría cambiar la decisión.</li></ol>
     <hr>
     <p>Los campos vacíos se explican en el resultado. Si falta lo esencial, el sistema se abstiene.</p>
-    <p class="hint" id="example-status" role="status"></p>
   </aside>
 </div>
 {% if not sale %}<script type="application/json" id="sale-example">{{ example|tojson }}</script>{% endif %}
