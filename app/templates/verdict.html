@@ -76,9 +76,9 @@
   {% for evidence in verdict.evidence %}
   <article class="evidence" data-rule-id="{{ evidence.rule_id }}" data-origin="{{ evidence.origin }}">
     <div class="section-heading"><h3>{{ evidence.rule_name }}</h3></div>
-    <p>{% if 'unsupported_claims' in evidence['values'] %}La promesa contiene condiciones sin respaldo: {% for claim in evidence['values']['unsupported_claims'] %}{{ claim.text if claim is mapping else claim }}{% if not loop.last %}, {% endif %}{% endfor %}.{% else %}{{ evidence.message }}{% endif %}</p>
+    <p>{% if 'unsupported_claims' in evidence['values'] %}La promesa contiene condiciones sin respaldo: {% for claim in evidence['values']['unsupported_claims'] %}{{ claim.text if claim is mapping else claim }}{% if not loop.last %}, {% endif %}{% endfor %}.{% else %}{{ evidence.message|plain }}{% endif %}</p>
     <details><summary>Valores utilizados</summary>
-      <dl class="facts">{% for key, value in evidence['values'].items() %}<div><dt>{{ key|plain }}</dt><dd>{% if key == 'unsupported_claims' %}{% for claim in value %}<p>{% if claim is mapping %}{{ claim.text }} <span class="tag">origen: {{ claim.origen }}</span>{% else %}{{ claim|plain }} <span class="tag">Léxico determinista</span>{% endif %}</p>{% endfor %}{% else %}{{ value if value is not none else 'Sin dato' }}{% endif %}</dd></div>{% endfor %}</dl>
+      <dl class="facts">{% for key, value in evidence['values'].items() %}<div><dt>{{ key|plain }}</dt><dd>{% if key == 'unsupported_claims' %}{% for claim in value %}<p>{% if claim is mapping %}{{ claim.text|plain }} <span class="tag">origen: {{ claim.origen }}</span>{% else %}{{ claim|plain }} <span class="tag">Léxico determinista</span>{% endif %}</p>{% endfor %}{% else %}{{ value if value is not none else 'Sin dato' }}{% endif %}</dd></div>{% endfor %}</dl>
     </details>
   </article>
   {% else %}<p>No se dispararon reglas con los datos disponibles.</p>{% endfor %}
@@ -88,7 +88,7 @@
     {% if verdict.promise %}
     <blockquote>{{ verdict.promise.raw_text or sale.promise_text or 'Promesa estructurada' }}</blockquote>
     <dl class="facts">{% for key, value in verdict.promise.model_dump().items() if key != 'raw_text' %}
-      <div><dt>{{ field_labels.get(key, key) }}</dt><dd>{% if value is none or value == [] %}Sin dato{% elif key == 'source' %}{{ {'llm': 'LLM', 'deterministic': 'Comparador determinista', 'structured': 'Datos estructurados'}.get(value, value) }}{% elif key == 'plan' %}{{ catalog.plans.get(value, {}).get('name', value) }}{% elif key == 'promo' %}{{ catalog.promos.get(value, {}).get('name', value) }}{% elif key == 'claims' %}{{ value|join(', ') }}{% else %}{{ value }}{% endif %}</dd></div>
+      <div><dt>{{ field_labels.get(key, key) }}</dt><dd>{% if value is none or value == [] %}Sin dato{% elif key == 'source' %}{{ {'llm': 'LLM', 'deterministic': 'Comparador determinista', 'structured': 'Datos estructurados'}.get(value, value) }}{% elif key == 'plan' %}{{ catalog.plans.get(value, {}).get('name', value) }}{% elif key == 'promo' %}{{ catalog.promos.get(value, {}).get('name', value) }}{% elif key == 'claims' %}{{ value|join(', ') }}{% else %}{{ value|plain }}{% endif %}</dd></div>
     {% endfor %}</dl>
     {% else %}<p>No se proporcionó una promesa para comparar.</p>{% endif %}
   </section>
@@ -96,7 +96,7 @@
     <ul>{% for field in verdict.missing_fields %}<li>{{ field_labels.get(field, field) }}</li>{% else %}<li>No faltan campos para los comparadores disponibles.</li>{% endfor %}</ul>
   </section>
 </div>
-<section class="panel"><h2>Historial de la venta</h2><ol class="timeline">{% for event in events %}<li><strong>{{ event_labels.get(event.kind, event.kind) }}</strong><time datetime="{{ event.at }}">{{ event.at|date_es }}</time><p>{{ event.detail }}</p></li>{% endfor %}</ol>
+<section class="panel"><h2>Historial de la venta</h2><ol class="timeline">{% for event in events %}<li><strong>{{ event_labels.get(event.kind, event.kind) }}</strong><time datetime="{{ event.at }}">{{ event.at|date_es }}</time><p>{{ event.detail|plain }}</p></li>{% endfor %}</ol>
   {% if sale.edits %}<details><summary>Cambios de campos ({{ sale.edits|length }})</summary>{% for edit in sale.edits %}<p><strong>{{ field_labels.get(edit.field, edit.field) }}</strong>: {{ edit.old if edit.old is not none else 'Sin dato' }} → {{ edit.new if edit.new is not none else 'Sin dato' }} <small>{{ edit.at|date_es }}</small></p>{% endfor %}</details>{% endif %}
 </section>
 </details>
