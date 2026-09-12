@@ -69,11 +69,11 @@
     <tr>
       <th scope="row"><a href="/ventas/{{ verdict.sale_id }}">{{ verdict.sale_id }}</a></th>
       <td>{{ row.sale.extra.get('veredicto_esperado') or {'buena': 'pasa', 'mala': 'revisar'}.get(row.sale.label, 'Sin etiqueta') }}</td>
-      <td><span class="tag {{ verdict.decision|lower }}">{{ verdict.decision }} · {{ decision_labels[verdict.decision] }}</span></td>
+      <td><span class="tag {{ verdict.decision|lower }}">{{ verdict.decision|capitalize }}</span></td>
       <td>{{ row.sale.customer_name or 'Sin nombre' }}</td>
       <td>{{ catalog.plans.get(row.sale.plan, {}).get('name', row.sale.plan) or 'Sin plan' }}</td>
       <td>{{ 'No estimable' if verdict.decision == 'ABSTENERSE' else 'S/ %.2f'|format(verdict.expected_cost) }}</td>
-      <td>{{ (row.main_rule.rule_id ~ ' · ' ~ row.main_rule.rule_name) if row.main_rule else 'Sin regla' }}</td>
+      <td>{{ row.main_rule.rule_name if row.main_rule else 'Sin observaciones' }}</td>
       <td>S/ {{ '%.2f'|format(verdict.recoverable_per_minute) }}</td>
     </tr>
     {% endfor %}</tbody></table>

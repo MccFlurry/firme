@@ -60,14 +60,14 @@
         {{ input('registered_at', 'datetime-local', step='any') }}
       </div>
       <p class="hint">Fechas en hora de Perú. Si no indicas el registro, se usará la hora de envío para una venta nueva.</p>
-      <p class="hint">Catálogo <span class="tag">{{ catalog.origen }}</span> {{ catalog.fuente }}</p>
+      <p class="hint">Catálogo público de WIN</p>
     </section>
     <details class="panel">
       <summary>Datos adicionales de demostración</summary>
       {{ select('label', {'buena': 'Buena', 'mala': 'Mala'}, 'Sin etiqueta') }}
       <label for="extra">Datos adicionales (objeto JSON)</label>
       <textarea id="extra" name="extra" rows="4" spellcheck="false" placeholder='{"billing_amount": 79.90}'>{{ values.get('extra') or '' }}</textarea>
-      <p class="hint">Puedes indicar el monto a facturar mediante <code>billing_amount</code> para compararlo con el precio registrado. La etiqueta no modifica la evaluación.</p>
+      <p class="hint">Puedes indicar el monto a facturar para compararlo con el precio registrado. La etiqueta no modifica la evaluación.</p>
       {% if sale %}<p>Tiempo de llenado original: {{ sale.fill_seconds if sale.fill_seconds is not none else 'sin medir' }} segundos.</p>{% endif %}
     </details>
     <input type="hidden" name="fill_seconds" value="{{ values.get('fill_seconds') if values.get('fill_seconds') is not none else '' }}">

@@ -7,7 +7,7 @@
 </div>
 <section class="panel decision {{ verdict.decision|lower }}">
   <p class="eyebrow">Decisión</p>
-  <h2 class="decision-title">{{ verdict.decision }} · {{ decision_labels[verdict.decision] }}</h2>
+  <h2 class="decision-title">{{ verdict.decision|capitalize }}</h2>
   {% set label = decision_labels[verdict.decision]|lower %}
   {% if verdict.decision == 'ABSTENERSE' %}
     <p><strong>Motivo:</strong> no hay datos suficientes para decidir. {{ (verdict.abstain_reason or (verdict.evidence[0].message if verdict.evidence else ''))|plain }}</p>
@@ -39,7 +39,7 @@
 {% if verdict.alert %}<section class="panel"><h2>Aviso de seguimiento</h2><p><strong>{{ verdict.alert.recipient }}</strong> · Urgencia {{ verdict.alert.urgency }}</p><p>{{ verdict.alert.action }}</p><p>Plazo: {{ verdict.alert.deadline|date_es }}</p><a href="/bandeja">Ver bandeja de avisos →</a></section>{% endif %}
 {% if verdict.alert %}<section class="panel"><h2>Aviso de seguimiento</h2><p><strong>{{ verdict.alert.recipient }}</strong> · Urgencia {{ verdict.alert.urgency }}</p><p>{{ verdict.alert.action }}</p><p>Plazo: {{ verdict.alert.deadline|date_es }}</p><a href="/bandeja">Ver bandeja de avisos →</a></section>{% endif %}
 <details class="panel"><summary>Detalle técnico (para el equipo)</summary>
-  <p class="hint">Costo de revisar = P-16 × P-17 = S/ {{ '%.2f'|format(verdict.review_cost)|replace('.', ',') }}. Costo esperado ≥ costo de revisar → revisar. Modelo de costos <span class="tag">{{ costs.origen }}</span> {{ costs.fuente }}</p>
+  <p class="hint">Costo de revisar = P-16 × P-17 = S/ {{ '%.2f'|format(verdict.review_cost)|replace('.', ',') }}. Costo esperado ≥ costo de revisar → revisar. Modelo de costos: {{ costs.fuente }}</p>
   <p class="hint">{{ explanation.label }}{% if explanation.model %} · {{ explanation.model }}{% endif %} · {{ 'Promesa extraída con IA' if verdict.llm_mode == 'llm' else 'Promesa: comparador determinista' }}</p>
   <div class="metrics">
     <div><span>Costo esperado</span><strong>{{ 'No estimable' if verdict.decision == 'ABSTENERSE' else 'S/ %.2f'|format(verdict.expected_cost) }}</strong></div>
@@ -53,7 +53,7 @@
     <div class="table-scroll" tabindex="0" role="region" aria-label="Desglose del costo esperado">
       <table><thead><tr><th>Desenlace</th><th>Probabilidad</th><th>Costo</th><th>Aporte</th></tr></thead><tbody>
         {% for key, probability in verdict.outcome_probs.items() %}
-        <tr><th scope="row">{{ costs.outcomes[key].label }} <span class="tag">{{ costs.outcomes[key].origen }}</span></th><td>{{ '%.1f'|format(probability * 100) }} %</td><td>S/ {{ '%.2f'|format(costs.outcomes[key].cost) }}</td><td>S/ {{ '%.2f'|format(verdict.outcome_costs[key]) }}</td></tr>
+        <tr><th scope="row">{{ costs.outcomes[key].label }}</th><td>{{ '%.1f'|format(probability * 100) }} %</td><td>S/ {{ '%.2f'|format(costs.outcomes[key].cost) }}</td><td>S/ {{ '%.2f'|format(verdict.outcome_costs[key]) }}</td></tr>
         {% endfor %}
       </tbody><tfoot><tr><th colspan="3">Total esperado</th><td>{{ 'No estimable' if verdict.decision == 'ABSTENERSE' else 'S/ %.2f'|format(verdict.expected_cost) }}</td></tr></tfoot></table>
     </div>
@@ -64,7 +64,7 @@
     {% if verdict.counterfactual %}
       <p>{{ verdict.counterfactual.text }}</p>
       {% for change in verdict.counterfactual.changes %}<div class="change"><strong>{{ field_labels.get(change.field, change.field) }}</strong><p>{{ change['from'] if change['from'] is not none else 'Sin indicar' }} → {{ change.to if change.to is not none else 'Sin indicar' }}</p><small>{{ change.reason }}</small></div>{% endfor %}
-      <p><span class="tag {{ verdict.counterfactual.resulting_decision|lower }}">{{ verdict.counterfactual.resulting_decision }} · {{ decision_labels[verdict.counterfactual.resulting_decision] }}</span> Costo resultante: <strong>{{ 'No estimable' if verdict.counterfactual.resulting_decision == 'ABSTENERSE' else 'S/ %.2f'|format(verdict.counterfactual.resulting_cost) }}</strong></p>
+      <p><span class="tag {{ verdict.counterfactual.resulting_decision|lower }}">{{ verdict.counterfactual.resulting_decision|capitalize }}</span> Costo resultante: <strong>{{ 'No estimable' if verdict.counterfactual.resulting_decision == 'ABSTENERSE' else 'S/ %.2f'|format(verdict.counterfactual.resulting_cost) }}</strong></p>
       <p class="hint">Escenario de comprobación. No modifica la venta ni autoriza cambiar las condiciones comerciales.</p>
     {% else %}<p>La venta puede avanzar. No se requieren ajustes con la información disponible.</p>{% endif %}
   </section>
@@ -75,7 +75,7 @@
   <div class="section-heading"><div><p class="eyebrow">Qué no coincide con qué</p><h2>Cadena de evidencia <span class="count">{{ verdict.evidence|length }}</span></h2></div><p>Severidad: <strong>{{ verdict.severity or 'sin señales' }}</strong> · Fuerza: <strong>{{ strength_labels.get(verdict.strength, 'sin señales') }}</strong></p></div>
   {% for evidence in verdict.evidence %}
   <article class="evidence" data-rule-id="{{ evidence.rule_id }}" data-origin="{{ evidence.origin }}">
-    <div class="section-heading"><h3>{{ evidence.rule_name }} <span class="tag">{{ evidence.origin }}</span></h3><span class="tag">{{ evidence.severity }} × {{ strength_labels[evidence.strength] }}</span></div>
+    <div class="section-heading"><h3>{{ evidence.rule_name }}</h3></div>
     <p>{% if 'unsupported_claims' in evidence['values'] %}La promesa contiene condiciones sin respaldo: {% for claim in evidence['values']['unsupported_claims'] %}{{ claim.text if claim is mapping else claim }}{% if not loop.last %}, {% endif %}{% endfor %}.{% else %}{{ evidence.message }}{% endif %}</p>
     <p class="source"><strong>Fuente:</strong> {{ evidence.source }}</p>
     <details><summary>Condición y valores utilizados</summary><pre>{{ evidence.condition }}</pre>
