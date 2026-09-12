@@ -1,8 +1,7 @@
 origen: SUPUESTO_DEMO
-fuente: "Plan del equipo (T1): ventanas y umbrales de señales para la demo."
-install_window_hours: 48
-confirmation_window_hours: 24
-alert_buffer_hours: 12
+fuente: 'Plan del equipo (T1): ventanas y umbrales de señales para la demo.'
+confirmation_window_hours: 240
+alert_buffer_hours: 24
 timezone: America/Lima
 burst_window_minutes: 10
 burst_threshold: 3
@@ -14,3 +13,26 @@ identity_edits_threshold: 1
 contact_collisions_threshold: 1
 address_collisions_threshold: 1
 cohort_prior_threshold: 0.1
+install_ceiling_days: 30
+install_median_days: 10
+verification_window_days: 10
+parameters:
+  install_ceiling_days:
+    id: P-01
+    origen: PUBLICO
+    fuente: docs/EVIDENCIA-PUBLICA.md §4, Anexo 1
+  install_median_days:
+    id: P-07
+    origen: SUPUESTO_DEMO
+    fuente: docs/MODELO-DE-COSTO.md §3
+  verification_window_days:
+    id: P-07
+    origen: SUPUESTO_DEMO
+    fuente: docs/MODELO-DE-COSTO.md §3; T10 §5
+  confirmation_window_hours:
+    id: P-07
+    origen: SUPUESTO_DEMO
+    fuente: T10 §5; verification_window_days × 24
+  alert_buffer_hours:
+    origen: SUPUESTO_DEMO
+    fuente: T10 §5, margen operativo antes de instalación

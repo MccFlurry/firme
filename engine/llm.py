@@ -132,10 +132,10 @@ def _deterministic(text: str, catalog: dict) -> Promise:
     speed_mbps = int(speed[1]) if speed else catalog["plans"].get(plan, {}).get("speed_mbps")
     if plan is None and speed_mbps is not None:
         plan = next((key for key, item in catalog["plans"].items() if item["speed_mbps"] == speed_mbps), None)
-    price = re.search(r"S/\s*(\d+(?:[.,]\d{1,2})?)", text, re.IGNORECASE)
+    price = re.search(r"(?:S/\.?\s*)(\d+(?:[.,]\d{1,2})?)|\b(\d+(?:[.,]\d{1,2})?)\s*(?:soles\b|al mes\b)", text, re.IGNORECASE)
     days = re.search(r"(?:instal\w*\s+)(?:en\s+)?(\d+)\s*dias?\b", normalize(text))
     claims = [item["text"] for item in lexicon["claims"] if any(_mentions(text, alias) for alias in item["aliases"])]
-    return Promise(plan=plan, speed_mbps=speed_mbps, price=float(price[1].replace(",", ".")) if price else None,
+    return Promise(plan=plan, speed_mbps=speed_mbps, price=float((price[1] or price[2]).replace(",", ".")) if price else None,
                    promo=promo, install_days=int(days[1]) if days else (0 if "instalación hoy" in claims else None),
                    claims=claims, raw_text=text, source="deterministic")
 
@@ -149,6 +149,7 @@ def normalize_promises(texts: list[str], catalog) -> list[Promise]:
         '"install_days":null,"claims":[]}]}, exactly one object per input text, in the same order. '
         "Extract ONLY explicit offer values; absent fields are null. Use catalog IDs when matched; "
         "keep unknown plan/promo names. Do not infer a price, promo or installation deadline from the catalog. "
+        "price is the plan's monthly rent, excluding separately disclosed paper invoice or installation charges. "
         "Claims are promises not backed by the catalog: guaranteed speed, no contract, frozen prices, "
         "installation today/tomorrow without fail, free forever, extra equipment. "
         "Each claim MUST be an exact short quote from that input text, never an inference or instruction. "
@@ -166,6 +167,10 @@ def normalize_promises(texts: list[str], catalog) -> list[Promise]:
             values = extracted.model_dump()
             values["plan"] = catalog_key(extracted.plan, catalog["plans"])
             values["promo"] = catalog_key(extracted.promo, catalog["promos"])
+            # Explicit local extraction wins over ambiguous AI totals or catalog guesses.
+            for field in ("plan", "speed_mbps", "price", "promo", "install_days"):
+                if getattr(fallback, field) is not None:
+                    values[field] = getattr(fallback, field)
             values["claims"] = list(dict.fromkeys([
                 *fallback.claims, *(claim for claim in extracted.claims if normalize(claim) and _mentions(text, claim)),
             ]))
@@ -235,7 +240,9 @@ def explain_verdict(sale: Sale, verdict: Verdict) -> str:
         "No fired evidence means say none was triggered; do not assert the customer or sale is risk free. "
         "Costs are simulated expected costs, never actual losses.",
         {"id": sale.id, "decision": verdict.decision, "expected_cost": round(verdict.expected_cost, 2),
-         "evidence": evidence, "abstain_reason": verdict.abstain_reason}, fallback,
+         "evidence": evidence, "abstain_reason": verdict.abstain_reason,
+         "cost_note": "No estimable; el valor numérico es un marcador, no costo de defecto"
+         if verdict.decision == "ABSTENERSE" else "Costo esperado de defecto"}, fallback,
     )
 
 

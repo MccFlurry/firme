@@ -7,6 +7,9 @@ from engine.rules import SEVERITIES
 def calculate(sale: Sale, verdict: Verdict, facts: dict, rules: list[dict], evaluate_sale) -> Counterfactual | None:
     if verdict.decision == "APROBAR":
         return None
+    if verdict.decision == "ABSTENERSE":
+        return Counterfactual(changes=[], resulting_decision=verdict.decision, resulting_cost=0,
+                              text=f"Completar la evidencia antes de calificar: {verdict.abstain_reason}")
     by_id = {rule["id"]: rule for rule in rules}
     candidate = sale.model_copy(deep=True)
     changes, attempted = [], set()
@@ -31,6 +34,8 @@ def calculate(sale: Sale, verdict: Verdict, facts: dict, rules: list[dict], eval
         details = "; ".join(f"{change['reason']} ({change['to']})" for change in changes)
         text = f"Si se aplican estos ajustes, esta venta pasaría: {details}."
     else:
-        text = "Con los ajustes disponibles, ningún cambio de un solo campo la haría pasar; requiere confirmación del cliente."
+        text = ("La confirmación ya existe; hay que aclarar la discrepancia indicada en la evidencia antes de avanzar."
+                if facts["confirmation_status"] == "confirmada" else
+                "Con los ajustes disponibles, ningún cambio de un solo campo la haría pasar; requiere confirmación del cliente.")
     return Counterfactual(changes=changes, resulting_decision=verdict.decision,
                           resulting_cost=verdict.expected_cost, text=text)

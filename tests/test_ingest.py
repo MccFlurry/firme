@@ -79,8 +79,8 @@ def test_consent_column_absent_is_unknown_not_missing():
     from contracts.types import Context
     from engine import evaluate
 
-    without_column, _ = parse([{"cliente": "Ana", "telefono": "912345678", "plan": "fibra_500", "precio": 99.0}])
-    with_empty_value, _ = parse([{"cliente": "Ana", "telefono": "912345678", "plan": "fibra_500", "precio": 99.0,
+    without_column, _ = parse([{"cliente": "Ana", "telefono": "912345678", "plan": "fibra_200", "precio": 99.0}])
+    with_empty_value, _ = parse([{"cliente": "Ana", "telefono": "912345678", "plan": "fibra_200", "precio": 99.0,
                                   "consentimiento": ""}])
     assert without_column[0].extra.get("consent_not_in_source") is True
     assert "consent_not_in_source" not in with_empty_value[0].extra

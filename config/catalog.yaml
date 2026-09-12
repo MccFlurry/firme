@@ -1,79 +1,287 @@
 origen: SUPUESTO_DEMO
-fuente: "Planes: tarifas públicas de https://win.pe/ (consultado 2026-09-12). Promos y cobertura: supuestos de demo."
+fuente: 'docs/EVIDENCIA-PUBLICA.md §1, §2 y §4; cartilla y superficies web recogidas el 2026-09-12. Promos de demo
+  y cobertura distrital: SUPUESTO_DEMO.'
 plans:
-  fibra_500:
-    name: Fibra 500 Mbps
-    speed_mbps: 500
-    price: 99.00
+  fibra_200:
+    name: Fibra 200 Mbps
+    speed_mbps: 200
+    price: 99
     tech: fibra
-    aliases: [fibra 500, 500 megas, plan 500]
+    aliases:
+    - fibra 200
+    - 200 megas
+    - plan 200
+    - 200 Mbps
+    surfaces:
+    - cartilla
     origen: PUBLICO
-    fuente: "https://win.pe/ (consultado 2026-09-12)"
-  fibra_750:
-    name: Fibra 750 Mbps (tarifa introductoria)
-    speed_mbps: 750
-    price: 54.50
+    fuente: docs/EVIDENCIA-PUBLICA.md §2.1
+  fibra_300:
+    name: Fibra 300 Mbps
+    speed_mbps: 300
+    price: 119
     tech: fibra
-    aliases: [fibra 750, 750 megas, plan 750]
+    aliases:
+    - fibra 300
+    - 300 megas
+    - plan 300
+    - 300 Mbps
+    surfaces:
+    - cartilla
     origen: PUBLICO
-    fuente: "https://win.pe/ (consultado 2026-09-12)"
-  fibra_850:
-    name: Fibra 850 Mbps (tarifa introductoria)
-    speed_mbps: 850
-    price: 59.50
+    fuente: docs/EVIDENCIA-PUBLICA.md §2.1
+  fibra_400:
+    name: Fibra 400 Mbps
+    speed_mbps: 400
+    price: 129
     tech: fibra
-    aliases: [fibra 850, 850 megas, plan 850]
+    aliases:
+    - fibra 400
+    - 400 megas
+    - plan 400
+    - 400 Mbps
+    surfaces:
+    - cartilla
     origen: PUBLICO
-    fuente: "https://win.pe/ (consultado 2026-09-12)"
+    fuente: docs/EVIDENCIA-PUBLICA.md §2.1
+  fibra_600:
+    name: Fibra 600 Mbps
+    speed_mbps: 600
+    price: 169
+    tech: fibra
+    aliases:
+    - fibra 600
+    - 600 megas
+    - plan 600
+    - 600 Mbps
+    surfaces:
+    - cartilla
+    origen: PUBLICO
+    fuente: docs/EVIDENCIA-PUBLICA.md §2.1
   fibra_1000:
-    name: Fibra 1000 Mbps (tarifa introductoria)
+    name: Fibra 1000 Mbps
     speed_mbps: 1000
-    price: 69.50
+    price: 259
     tech: fibra
-    aliases: [fibra 1000, 1000 megas, plan 1000, un giga]
+    aliases:
+    - fibra 1000
+    - 1000 megas
+    - plan 1000
+    - 1000 Mbps
+    surfaces:
+    - cartilla
+    - web_hogar
+    - web_chiclayo
     origen: PUBLICO
-    fuente: "https://win.pe/ (consultado 2026-09-12)"
+    fuente: docs/EVIDENCIA-PUBLICA.md §2.1
+    surface_prices:
+      web_hogar: 69.5
+      web_chiclayo: 69.5
+    web_note: Tarifa introductoria observada 2026-09-12, verificar en vivo antes de presentar
+  fibra_100:
+    name: Fibra 100 Mbps
+    speed_mbps: 100
+    price: 79
+    tech: fibra
+    aliases:
+    - fibra 100
+    - 100 megas
+    - plan 100
+    - 100 Mbps
+    surfaces:
+    - cartilla
+    origen: PUBLICO
+    fuente: docs/EVIDENCIA-PUBLICA.md §2.1
+    zones:
+    - provincias
+  fibra_350:
+    name: Fibra 350 Mbps (tarifa introductoria, verificar)
+    speed_mbps: 350
+    price: null
+    tech: fibra
+    aliases:
+    - fibra 350
+    - 350 megas
+    - plan 350
+    - 350 Mbps
+    surfaces:
+    - web_chiclayo
+    origen: PUBLICO
+    fuente: docs/EVIDENCIA-PUBLICA.md §1; T10 §3, observado 2026-09-12; verificar en vivo
+  fibra_550:
+    name: Fibra 550 Mbps (tarifa introductoria, verificar)
+    speed_mbps: 550
+    price: null
+    tech: fibra
+    aliases:
+    - fibra 550
+    - 550 megas
+    - plan 550
+    - 550 Mbps
+    surfaces:
+    - web_chiclayo
+    origen: PUBLICO
+    fuente: docs/EVIDENCIA-PUBLICA.md §1; T10 §3, observado 2026-09-12; verificar en vivo
+  fibra_750:
+    name: Fibra 750 Mbps (tarifa introductoria, verificar)
+    speed_mbps: 750
+    price: 54.5
+    tech: fibra
+    aliases:
+    - fibra 750
+    - 750 megas
+    - plan 750
+    - 750 Mbps
+    surfaces:
+    - web_chiclayo
+    origen: PUBLICO
+    fuente: docs/EVIDENCIA-PUBLICA.md §1; T10 §3, observado 2026-09-12; verificar en vivo
+  fibra_500:
+    name: Fibra 500 Mbps (tarifa introductoria, verificar)
+    speed_mbps: 500
+    price: 99
+    tech: fibra
+    aliases:
+    - fibra 500
+    - 500 megas
+    - plan 500
+    - 500 Mbps
+    surfaces:
+    - web_hogar
+    origen: PUBLICO
+    fuente: docs/EVIDENCIA-PUBLICA.md §1; T10 §3, observado 2026-09-12; verificar en vivo
+  fibra_850:
+    name: Fibra 850 Mbps (tarifa introductoria, verificar)
+    speed_mbps: 850
+    price: 59.5
+    tech: fibra
+    aliases:
+    - fibra 850
+    - 850 megas
+    - plan 850
+    - 850 Mbps
+    surfaces:
+    - web_hogar
+    origen: PUBLICO
+    fuente: docs/EVIDENCIA-PUBLICA.md §1; T10 §3, observado 2026-09-12; verificar en vivo
 promos:
   primer_mes_gratis:
     name: Primer mes gratis
-    aliases: [primer mes gratis, un mes gratis]
-    applies_to: [fibra_750, fibra_850, fibra_1000]
+    aliases:
+    - primer mes gratis
+    - un mes gratis
+    applies_to:
+    - fibra_300
+    - fibra_400
+    - fibra_600
+    - fibra_1000
     months: 1
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), promociones de demostración."
+    fuente: Plan del equipo (T1), promociones de demostración.
   descuento_3m:
     name: S/ 20 de descuento por 3 meses
-    aliases: [descuento de 20 soles por 3 meses, descuento por 3 meses, descuento 3m]
-    applies_to: [fibra_500, fibra_750]
+    aliases:
+    - descuento de 20 soles por 3 meses
+    - descuento por 3 meses
+    - descuento 3m
+    applies_to:
+    - fibra_200
+    - fibra_300
     discount: 20
     months: 3
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), promociones de demostración."
+    fuente: Plan del equipo (T1), promociones de demostración.
 coverage:
   chiclayo_centro:
-    tech: [fibra]
+    tech:
+    - fibra
     max_speed_mbps: 1000
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), cobertura sintética."
+    fuente: Plan del equipo (T1), cobertura sintética.
   la_victoria:
-    tech: [fibra]
+    tech:
+    - fibra
     max_speed_mbps: 850
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), cobertura sintética."
+    fuente: Plan del equipo (T1), cobertura sintética.
   jose_leonardo_ortiz:
-    tech: [fibra]
+    tech:
+    - fibra
     max_speed_mbps: 500
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), cobertura sintética."
+    fuente: Plan del equipo (T1), cobertura sintética.
   pimentel:
-    tech: [inalambrico]
+    tech:
+    - inalambrico
     max_speed_mbps: 50
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), cobertura sintética."
+    fuente: Plan del equipo (T1), cobertura sintética.
   monsefu:
     tech: []
     max_speed_mbps: 0
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), cobertura sintética."
+    fuente: Plan del equipo (T1), cobertura sintética.
 price_tolerance: 0.02
-install_sla_days: 3
+surfaces:
+  cartilla:
+    origen: PUBLICO
+    fuente: https://win.pe/files/cartilla-informativa.pdf?ver=1.2
+    governs_contract: true
+  web_hogar:
+    origen: PUBLICO
+    fuente: https://win.pe/hogar
+    promo_months: 1
+    date: '2026-09-12'
+    note: verificar en vivo antes de presentar
+  web_chiclayo:
+    origen: PUBLICO
+    fuente: https://win.pe/chiclayo
+    promo_months: 3
+    date: '2026-09-12'
+    note: verificar en vivo antes de presentar
+promo_prices:
+  fibra_100:
+    price: 39.5
+    origen: SUPUESTO_DEMO
+    fuente: docs/EVIDENCIA-PUBLICA.md §3.1; ejemplo promocional del banco LIM-01
+installation:
+  cost: 120.0
+  quotas: 6
+  quota: 20.0
+  id: P-02
+  origen: PUBLICO
+  fuente: docs/EVIDENCIA-PUBLICA.md §2.2
+paper_invoice_fee:
+  amount: 10.0
+  id: P-03
+  origen: PUBLICO
+  fuente: docs/EVIDENCIA-PUBLICA.md §4, Anexo 1
+forced_term_months:
+  value: 6
+  id: P-04
+  origen: PUBLICO
+  fuente: docs/EVIDENCIA-PUBLICA.md §2.5 y §4
+min_credit_score:
+  value: 201
+  origen: PUBLICO
+  fuente: docs/EVIDENCIA-PUBLICA.md §2.3, cartilla
+mesh:
+  included: false
+  note: a solicitud
+  origen: PUBLICO
+  fuente: docs/EVIDENCIA-PUBLICA.md §1
+regions:
+  lima:
+  - Lima Metropolitana
+  - Lima
+  - Callao
+  - Barranca
+  - Huaral
+  - Hualmay
+  - Huacho
+  provincias:
+  - Santa
+  - Trujillo
+  - Chiclayo
+  - Lambayeque
+  - Piura

@@ -20,7 +20,10 @@ def evaluate(sale: Sale, ctx: Context) -> Verdict:
         facts = build_facts(candidate, ctx, catalog, settings, costs)
         evidence = evaluate_rules(facts, rules)
         probabilities, amounts, expected_cost = calculate_cost(evidence, facts["prior"], costs)
-        decision, abstain_reason = decide(facts, evidence, expected_cost, costs)
+        decision, abstain_reason = decide(facts, evidence, expected_cost, costs, rules)
+        if decision == "ABSTENERSE":
+            # Frozen float contract: zero is a sentinel, rendered as "No estimable".
+            probabilities, amounts, expected_cost = {}, {}, 0.0
         missing = [field for field in (
             "seller_id", "channel", "customer_name", "customer_doc", "phone", "email", "address",
             "district", "plan", "price", "install_date", "registered_at", "fill_seconds", "consent_evidence",
@@ -38,7 +41,8 @@ def evaluate(sale: Sale, ctx: Context) -> Verdict:
             severity=max((item.severity for item in evidence), key=SEVERITIES.index, default=None),
             strength=max((item.strength for item in evidence), key=STRENGTHS.index, default=None),
             evidence=evidence, counterfactual=None, missing_fields=missing, abstain_reason=abstain_reason,
-            llm_mode=llm_mode, recoverable_per_minute=expected_cost * costs["recoverability"] / costs["review"]["minutes"],
+            llm_mode=llm_mode, recoverable_per_minute=(costs["review"]["cost"] if decision == "ABSTENERSE"
+                else expected_cost * costs["recoverability"]) / costs["review"]["minutes"],
             alert=make_alert(candidate, ctx, decision, evidence, settings),
             config_origins={rule["id"]: rule["origen"] for rule in rules}, promise=candidate.promise,
         )

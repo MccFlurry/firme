@@ -27,7 +27,7 @@
       <div class="section-heading"><h2><span class="step">01</span> Lo acordado</h2>{% if not sale %}<button class="button secondary" type="button" id="load-example">Cargar ejemplo</button>{% endif %}</div>
       {% if not sale %}<p class="hint" id="example-status" role="status"></p>{% endif %}
       <label for="promise-text">Lo que se ofreció al cliente</label>
-      <textarea id="promise-text" name="promise_text" rows="4" maxlength="10000" placeholder="Ej.: Fibra 500 Mbps a S/ 99.00 al mes. Instalación en 1 día." aria-describedby="promise-help">{{ values.get('promise_text') or '' }}</textarea>
+      <textarea id="promise-text" name="promise_text" rows="4" maxlength="10000" placeholder="Ej.: Fibra 200 Mbps a S/ 99.00 al mes. Instalación en 1 día." aria-describedby="promise-help">{{ values.get('promise_text') or '' }}</textarea>
       <p class="hint" id="promise-help">Escribe la promesa tal como se explicó al cliente. Se extraerán el plan, el precio y las condiciones que puedan reconocerse.</p>
       <div class="fields">
         {{ input('seller_id', placeholder='Ej.: VEN-001') }}
@@ -51,7 +51,7 @@
     <section class="panel">
       <h2><span class="step">03</span> Oferta registrada</h2>
       <div class="fields">
-        {% set plans = {} %}{% for key, item in catalog.plans.items() %}{% set _ = plans.update({key: item.name ~ ' · S/ ' ~ ('%.2f'|format(item.price))}) %}{% endfor %}
+        {% set plans = {} %}{% for key, item in catalog.plans.items() %}{% set _ = plans.update({key: item.name ~ ' · S/ ' ~ ('%.2f'|format(item.price) if item.price is not none else 'por verificar')}) %}{% endfor %}
         {{ select('plan', plans) }}
         {{ input('price', 'number', '79.90', '0.01') }}
         {% set promos = {} %}{% for key, item in catalog.promos.items() %}{% set _ = promos.update({key: item.name}) %}{% endfor %}

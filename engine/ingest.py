@@ -13,13 +13,15 @@ import difflib
 import io
 import json
 import math
+import re
 from collections.abc import Mapping
 
 from pydantic import Field
 
 from contracts.types import IngestReport, Sale
-from engine.facts import normalize
+from engine.facts import normalize, plan_for_speed
 from engine.llm import map_columns
+from engine.rules import load_config
 
 
 class SemanticIngestReport(IngestReport):
@@ -65,14 +67,33 @@ FIELD_SYNONYMS = {
 EXTRA_SYNONYMS = ["extra", "adicional", "adicionales", "datos adicionales"]
 IGNORED_SYNONYMS: list[str] = []
 
+# CONTRATO-DE-DATOS.md §4: keep Anexo 1 fields under their canonical names.
+CONTRACT_FIELDS = {
+    "promesa_declarada": "promise_text", "precio_mensual": "price",
+    "cliente_documento": "customer_doc", "telefono_1": "phone", "correo_electronico": "email",
+    "direccion": "address", "nombre_asesor": "seller_id", "canal": "channel",
+    "fecha_hora_registro": "registered_at", "ediciones_registro": "edits",
+    **{name: f"extra.{name}" for name in (
+        "velocidad_contratada", "telefono_2", "equipo", "plazo_estimado_instalacion",
+        "confirmacion_titular", "confirmacion_titular_ts", "plazo_vigencia", "forma_entrega_recibo",
+        "forma_pago", "forma_pago_instalacion", "cargo_instalacion_costo", "cargo_instalacion_cuotas",
+        "tenencia", "etapa", "nombre_condominio", "torre", "departamento", "score_crediticio",
+        "catalogo_referencia_id", "acta_instalacion_ts",
+    )},
+}
+for _name, _field in CONTRACT_FIELDS.items():
+    FIELD_SYNONYMS.setdefault(_field, []).append(_name)
+for _name in ("veredicto_esperado", "familia", "comparador"):
+    FIELD_SYNONYMS[f"extra.{_name}"] = [_name]
+
 LABEL_POSITIVE = {"buena", "good", "valida", "valido", "ok", "si", "yes", "sano",
-                  "true", "1", "correcta", "aprobada", "aprobado"}
+                  "true", "1", "correcta", "aprobada", "aprobado", "pasa"}
 LABEL_NEGATIVE = {"mala", "bad", "fraude", "no", "false", "0", "incorrecta",
-                  "fraudulenta", "rechazada", "rechazado", "desaprobada"}
+                  "fraudulenta", "rechazada", "rechazado", "desaprobada", "revisar"}
 
 _SYNONYM_INDEX: dict[str, str] = {}
 for _field, _names in FIELD_SYNONYMS.items():
-    for _name in _names:
+    for _name in [_field, *_names]:
         _SYNONYM_INDEX.setdefault(normalize(_name), _field)
 _EXTRA_KEYS = {normalize(name) for name in EXTRA_SYNONYMS}
 _IGNORED_KEYS = {normalize(name) for name in IGNORED_SYNONYMS}
@@ -84,7 +105,7 @@ def _is_ignored(column: str) -> bool:
 
 
 def _match_column(column: str) -> str | None:
-    key = normalize(column)
+    key = normalize(re.sub(r"(?<=[a-z0-9])(?=[A-Z])", " ", column))
     if not key:
         return None
     if key in _SYNONYM_INDEX:
@@ -161,7 +182,13 @@ def _coerce(field: str, raw):
                 raw = json.loads(raw)
             except (json.JSONDecodeError, TypeError, ValueError):
                 return []
-        return raw if isinstance(raw, list) else []
+        return [{**edit, "field": CONTRACT_FIELDS.get(edit.get("field"), edit.get("field"))}
+                if isinstance(edit, dict) else edit for edit in raw] if isinstance(raw, list) else []
+    if field in {"extra.velocidad_contratada", "extra.plazo_estimado_instalacion",
+                 "extra.cargo_instalacion_cuotas", "extra.score_crediticio"}:
+        return _to_int(raw)
+    if field == "extra.cargo_instalacion_costo":
+        return _to_float(raw)
     return raw
 
 
@@ -250,6 +277,7 @@ def parse(payload: str | bytes | list[dict], filename: str | None = None) -> tup
 
     sales: list[Sale] = []
     errors: list[str] = []
+    catalog = load_config("catalog")
     for index, row in enumerate(raw_rows, start=1):
         if not isinstance(row, Mapping):
             errors.append(str(row) if isinstance(row, str) else f"Fila {index}: no es un objeto.")
@@ -271,7 +299,19 @@ def parse(payload: str | bytes | list[dict], filename: str | None = None) -> tup
                     else:
                         extra[column] = raw
                     continue
+                if field.startswith("extra."):
+                    extra[field[6:]] = _coerce(field, raw)
+                    continue
                 values[field] = _coerce(field, raw)
+                if field == "label" and normalize(str(raw)) == "abstencion":
+                    extra["veredicto_esperado"] = "abstención"
+            if "veredicto_esperado" in extra:
+                expected = extra["veredicto_esperado"]
+                values["label"] = _normalize_label(expected)
+                if normalize(str(expected)) == "abstencion":
+                    extra["veredicto_esperado"] = "abstención"
+            if not values.get("plan"):
+                values["plan"] = plan_for_speed(extra.get("velocidad_contratada"), catalog["plans"])
             if "consent_evidence" not in mapped.values():
                 # The source never exposes consent: the absence signal cannot be computed, only reported.
                 extra["consent_not_in_source"] = True

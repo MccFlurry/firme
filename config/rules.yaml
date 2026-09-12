@@ -19,8 +19,8 @@
 - id: R02_precio_prometido_distinto
   name: Precio prometido distinto al catálogo
   description: La promesa indica S/ {promise_price}; el catálogo con la promoción aplicable indica S/ {promise_catalog_price}.
-  condition: promise_price is not None and promise_catalog_price is not None and (promise_price < promise_catalog_price *
-    (1 - price_tolerance) or promise_price > promise_catalog_price * (1 + price_tolerance))
+  condition: promise_price is not None and promise_catalog_price is not None and (promise_price < promise_catalog_price
+    * (1 - price_tolerance) or promise_price > promise_catalog_price * (1 + price_tolerance))
   severity: media
   message: La promesa indica S/ {promise_price}; el catálogo con la promoción aplicable indica S/ {promise_catalog_price}.
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -42,9 +42,9 @@
   condition: price is not None and catalog_price is not None and price < catalog_price * (1 - price_tolerance)
   severity: alta
   message: Precio registrado S/ {price} por debajo del tarifario S/ {catalog_price}.
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
-  origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  source: docs/EVIDENCIA-PUBLICA.md §1 y §2.1, escalones y tarifario de la cartilla
+  origen: PUBLICO
+  fuente: docs/EVIDENCIA-PUBLICA.md §1 y §2.1, escalones y tarifario de la cartilla
   edge: catalogo-registro
   strength: determinista
   inputs:
@@ -64,9 +64,9 @@
   condition: plan is not None and not plan_exists
   severity: alta
   message: El plan registrado {plan} no existe en el catálogo.
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
-  origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  source: docs/EVIDENCIA-PUBLICA.md §1 y §2.1, escalones y tarifario de la cartilla
+  origen: PUBLICO
+  fuente: docs/EVIDENCIA-PUBLICA.md §1 y §2.1, escalones y tarifario de la cartilla
   edge: catalogo-registro
   strength: determinista
   inputs:
@@ -92,8 +92,8 @@
   - promo
   - promo_applies
   impacts:
-    reclamo: 0.25
-    reversion_facturacion: 0.3
+    reclamo: 0.3
+    reversion_facturacion: 0.35
   fix: null
 - id: R06_plan_promesa_registro
   name: Plan prometido distinto del registro
@@ -120,8 +120,8 @@
 - id: R07_precio_promesa_registro
   name: Precio prometido distinto del registro
   description: Se prometió S/ {promise_price} y se registró S/ {price}.
-  condition: promise_price is not None and price is not None and (price < promise_price * (1 - price_tolerance) or price >
-    promise_price * (1 + price_tolerance)) and confirmation_status != "confirmada"
+  condition: promise_price is not None and price is not None and (price < promise_price * (1 - price_tolerance)
+    or price > promise_price * (1 + price_tolerance)) and confirmation_status != "confirmada"
   severity: media
   message: Se prometió S/ {promise_price} y se registró S/ {price}.
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -135,8 +135,8 @@
   - price_tolerance
   - confirmation_status
   impacts:
-    reclamo: 0.25
-    reversion_facturacion: 0.2
+    reclamo: 0.3
+    reversion_facturacion: 0.35
   fix:
     field: price
     value: promise_price
@@ -157,17 +157,18 @@
   - promo
   - confirmation_status
   impacts:
-    reclamo: 0.25
-    reversion_facturacion: 0.2
+    reclamo: 0.3
+    reversion_facturacion: 0.35
   fix:
     field: promo
     value: promise_promo
     reason: registrar la promoción acordada
 - id: R09_fecha_promesa_registro
   name: Plazo prometido distinto del registro
-  description: Se prometió instalar en {promise_install_days} días; el registro indica {registered_install_days} días.
-  condition: promise_install_days is not None and registered_install_days is not None and promise_install_days != registered_install_days
-    and confirmation_status != "confirmada"
+  description: Se prometió instalar en {promise_install_days} días; el registro indica {registered_install_days}
+    días.
+  condition: promise_install_days is not None and registered_install_days is not None and promise_install_days !=
+    registered_install_days and confirmation_status != "confirmada"
   severity: media
   message: Se prometió instalar en {promise_install_days} días; el registro indica {registered_install_days} días.
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -188,12 +189,12 @@
     reason: registrar la fecha de instalación acordada
 - id: R10_sin_cobertura
   name: Zona incompatible con el plan
-  description: 'El plan {plan} ({catalog_speed} Mbps) no es entregable en {district}: máximo {zone_max_speed} Mbps y tecnología
-    según catálogo.'
+  description: 'El plan {plan} ({catalog_speed} Mbps) no es entregable en {district}: máximo {zone_max_speed} Mbps
+    y tecnología según catálogo.'
   condition: zone_supports_plan is False
   severity: alta
-  message: 'El plan {plan} ({catalog_speed} Mbps) no es entregable en {district}: máximo {zone_max_speed} Mbps y tecnología
-    según catálogo.'
+  message: 'El plan {plan} ({catalog_speed} Mbps) no es entregable en {district}: máximo {zone_max_speed} Mbps y
+    tecnología según catálogo.'
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
   origen: SUPUESTO_DEMO
   fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -215,17 +216,18 @@
   condition: install_within_window is False
   severity: media
   message: La instalación {install_date} cae fuera de la ventana desde el registro {registered_at}.
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
-  origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  source: 'docs/EVIDENCIA-PUBLICA.md §4, Anexo 1; docs/MODELO-DE-COSTO.md §3 P-01: techo contractual de 30 días'
+  origen: PUBLICO
+  fuente: 'docs/EVIDENCIA-PUBLICA.md §4, Anexo 1; docs/MODELO-DE-COSTO.md §3 P-01: techo contractual de 30 días'
   edge: registro-entrega
   strength: determinista
   inputs:
   - registered_at
   - install_date
   - install_within_window
+  - plazo_estimado_instalacion
   impacts:
-    instalacion_fallida: 0.2
+    instalacion_fallida: 0.4
     reclamo: 0.15
   fix:
     field: install_date
@@ -234,8 +236,8 @@
 - id: R12_facturacion_distinta
   name: Monto a facturar distinto del registro
   description: Se facturaría S/ {billing_amount}, pero se registró S/ {price}.
-  condition: billing_amount is not None and price is not None and (billing_amount < price * (1 - price_tolerance) or billing_amount
-    > price * (1 + price_tolerance))
+  condition: billing_amount is not None and price is not None and (billing_amount < price * (1 - price_tolerance)
+    or billing_amount > price * (1 + price_tolerance))
   severity: media
   message: Se facturaría S/ {billing_amount}, pero se registró S/ {price}.
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -266,14 +268,14 @@
   - consent_missing
   - confirmation_status
   impacts:
-    reclamo: 0.12
-    baja_temprana: 0.05
+    reclamo: 0.25
+    baja_temprana: 0.2
   fix: null
 - id: R14_colision_telefono
   name: Colisión de teléfono entre titulares
   description: El teléfono coincide con el de {phone_collisions} ventas de otro titular.
-  condition: phone_collisions is not None and phone_collisions >= contact_collisions_threshold and confirmation_status !=
-    "confirmada"
+  condition: phone_collisions is not None and phone_collisions >= contact_collisions_threshold and confirmation_status
+    != "confirmada"
   severity: alta
   message: El teléfono coincide con el de {phone_collisions} ventas de otro titular.
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -292,8 +294,8 @@
 - id: R15_colision_correo
   name: Colisión de correo entre titulares
   description: El correo coincide con el de {email_collisions} ventas de otro titular.
-  condition: email_collisions is not None and email_collisions >= contact_collisions_threshold and confirmation_status !=
-    "confirmada"
+  condition: email_collisions is not None and email_collisions >= contact_collisions_threshold and confirmation_status
+    != "confirmada"
   severity: alta
   message: El correo coincide con el de {email_collisions} ventas de otro titular.
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -312,7 +314,8 @@
 - id: R16_colision_documento
   name: Colisión de documento entre titulares
   description: El documento coincide con el de {doc_collisions} ventas de otro titular.
-  condition: doc_collisions is not None and doc_collisions >= contact_collisions_threshold and confirmation_status != "confirmada"
+  condition: doc_collisions is not None and doc_collisions >= contact_collisions_threshold and confirmation_status
+    != "confirmada"
   severity: alta
   message: El documento coincide con el de {doc_collisions} ventas de otro titular.
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -331,7 +334,8 @@
 - id: R17_direccion_repetida
   name: Dirección repetida en el día
   description: La dirección normalizada coincide con {address_collisions} ventas adicionales del mismo día.
-  condition: address_collisions is not None and address_collisions >= address_collisions_threshold
+  condition: address_collisions is not None and address_collisions >= address_collisions_threshold and not (torre
+    and departamento)
   severity: media
   message: La dirección normalizada coincide con {address_collisions} ventas adicionales del mismo día.
   source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
@@ -344,9 +348,11 @@
   - address_collisions_threshold
   - address
   - registered_at
+  - torre
+  - departamento
   impacts:
-    instalacion_fallida: 0.12
-    reclamo: 0.08
+    instalacion_fallida: 0.35
+    reclamo: 0.1
   fix: null
 - id: R18_rafaga
   name: Ráfaga de ventas
@@ -364,8 +370,8 @@
   - burst_count
   - burst_threshold
   impacts:
-    reclamo: 0.12
-    baja_temprana: 0.06
+    reclamo: 0.25
+    baja_temprana: 0.2
   fix: null
 - id: R19_llenado_rapido
   name: Llenado demasiado breve
@@ -382,8 +388,8 @@
   - fill_seconds
   - fill_seconds_threshold
   impacts:
-    reclamo: 0.12
-    baja_temprana: 0.06
+    reclamo: 0.25
+    baja_temprana: 0.2
   fix: null
 - id: R20_hora_atipica
   name: Registro en hora atípica
@@ -401,8 +407,8 @@
   - night_start_hour
   - night_end_hour
   impacts:
-    reclamo: 0.1
-    baja_temprana: 0.03
+    reclamo: 0.25
+    baja_temprana: 0.2
   fix: null
 - id: R21_reedicion_precio
   name: Reedición repetida de precio
@@ -419,8 +425,8 @@
   - price_edits
   - price_edits_threshold
   impacts:
-    reclamo: 0.25
-    reversion_facturacion: 0.3
+    reclamo: 0.3
+    reversion_facturacion: 0.35
   fix: null
 - id: R22_reedicion_identidad
   name: Titular editado después del envío
@@ -446,9 +452,9 @@
   condition: unsupported_claims
   severity: alta
   message: 'La promesa contiene condiciones inexistentes o insostenibles: {unsupported_claims}.'
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  source: config/lexicon.yaml; docs/EVIDENCIA-PUBLICA.md §1 para mesh; otras afirmaciones son SUPUESTO_DEMO
   origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  fuente: config/lexicon.yaml; docs/EVIDENCIA-PUBLICA.md §1 para mesh; otras afirmaciones son SUPUESTO_DEMO
   edge: promesa-catalogo
   strength: linguistica
   inputs:
@@ -463,9 +469,9 @@
   condition: confirmation_status == "corregida" and confirmation_status != "confirmada"
   severity: media
   message: 'El cliente pidió corregir lo registrado: {confirmation_note}'
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  source: CONTRATO-DE-DATOS.md §6, estados de confirmacion_titular; docs/MODELO-DE-COSTO.md §3, probabilidades SUPUESTO_DEMO
   origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  fuente: CONTRATO-DE-DATOS.md §6, estados de confirmacion_titular; docs/MODELO-DE-COSTO.md §3, probabilidades SUPUESTO_DEMO
   edge: promesa-registro
   strength: determinista
   inputs:
@@ -473,7 +479,7 @@
   - confirmation_note
   impacts:
     reclamo: 0.3
-    reversion_facturacion: 0.25
+    reversion_facturacion: 0.35
   fix: null
 - id: R25_cliente_desconoce
   name: Cliente desconoce el servicio
@@ -481,9 +487,9 @@
   condition: confirmation_status == "desconocida" and confirmation_status != "confirmada"
   severity: bloqueante
   message: El cliente indicó que no pidió este servicio.
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  source: CONTRATO-DE-DATOS.md §6, estados de confirmacion_titular; docs/MODELO-DE-COSTO.md §3, probabilidades SUPUESTO_DEMO
   origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  fuente: CONTRATO-DE-DATOS.md §6, estados de confirmacion_titular; docs/MODELO-DE-COSTO.md §3, probabilidades SUPUESTO_DEMO
   edge: identidad
   strength: determinista
   inputs:
@@ -500,9 +506,9 @@
   condition: confirmation_status == "silencio" and confirmation_status != "confirmada"
   severity: alta
   message: Venció la ventana de confirmación sin respuesta del cliente.
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  source: CONTRATO-DE-DATOS.md §6, estados de confirmacion_titular; docs/MODELO-DE-COSTO.md §3, probabilidades SUPUESTO_DEMO
   origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  fuente: CONTRATO-DE-DATOS.md §6, estados de confirmacion_titular; docs/MODELO-DE-COSTO.md §3, probabilidades SUPUESTO_DEMO
   edge: identidad
   strength: determinista
   inputs:
@@ -513,34 +519,36 @@
     baja_temprana: 0.5
   fix: null
 - id: R27_prior_canal
-  name: Calibración por cohorte de canal
+  name: Calibración por cohorte de canal, asesor o equipo
   description: 'Prior supuesto del canal {channel}: {prior}. Calibra el costo esperado; no es una sanción al vendedor.'
   condition: prior >= cohort_prior_threshold
   severity: baja
-  message: 'Prior supuesto del canal {channel}: {prior}. Calibra el costo esperado; no es una sanción al vendedor.'
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  message: 'Prior supuesto de canal/asesor/equipo: {prior}. Calibra el costo esperado; no es una sanción al vendedor.'
+  source: docs/CASOS-ADVERSARIOS.md §3 BUE-05 y §6 LIM-03; T10 §4, máximo de priors, no sanción
   origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  fuente: docs/CASOS-ADVERSARIOS.md §3 BUE-05 y §6 LIM-03; T10 §4, máximo de priors, no sanción
   edge: senal
   strength: estadistica
   inputs:
   - channel
   - prior
   - cohort_prior_threshold
+  - seller_id
+  - equipo
   impacts: {}
   fix: null
 - id: R28_velocidad_prometida
   name: Velocidad prometida fuera del catálogo
-  description: La velocidad prometida {promise_speed_mbps} Mbps no coincide con la oferta del catálogo para esa promesa ({promise_catalog_speed}
-    Mbps).
-  condition: promise_speed_mbps is not None and (promise_speed_mbps not in catalog_speeds or (promise_catalog_speed is not
-    None and promise_speed_mbps != promise_catalog_speed))
+  description: La velocidad prometida {promise_speed_mbps} Mbps no coincide con la oferta del catálogo para esa
+    promesa ({promise_catalog_speed} Mbps).
+  condition: promise_speed_mbps is not None and (promise_speed_mbps not in catalog_speeds or (promise_catalog_speed
+    is not None and promise_speed_mbps != promise_catalog_speed))
   severity: alta
-  message: La velocidad prometida {promise_speed_mbps} Mbps no coincide con la oferta del catálogo para esa promesa ({promise_catalog_speed}
-    Mbps).
-  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
-  origen: SUPUESTO_DEMO
-  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  message: La velocidad prometida {promise_speed_mbps} Mbps no coincide con la oferta del catálogo para esa promesa
+    ({promise_catalog_speed} Mbps).
+  source: docs/EVIDENCIA-PUBLICA.md §1 y §2.1, escalones y tarifario de la cartilla
+  origen: PUBLICO
+  fuente: docs/EVIDENCIA-PUBLICA.md §1 y §2.1, escalones y tarifario de la cartilla
   edge: promesa-catalogo
   strength: determinista
   inputs:
@@ -567,6 +575,212 @@
   - promise_promo
   - promise_promo_applies
   impacts:
-    reclamo: 0.25
-    reversion_facturacion: 0.3
+    reclamo: 0.3
+    reversion_facturacion: 0.35
+  fix: null
+- id: R30_permanencia_prometida
+  name: Permanencia prometida distinta del contrato
+  description: La promesa dice sin permanencia; el registro indica {plazo_vigencia}.
+  edge: promesa-registro
+  severity: alta
+  strength: determinista
+  condition: promise_no_term and plazo_vigencia is not None and plazo_vigencia.startswith("forzoso")
+  inputs:
+  - promise_no_term
+  - plazo_vigencia
+  message: La promesa dice sin permanencia; el registro indica {plazo_vigencia}.
+  source: docs/EVIDENCIA-PUBLICA.md §2.5 (cartilla) y §4 (Anexo 1), permanencia forzosa
+  fuente: docs/EVIDENCIA-PUBLICA.md §2.5 (cartilla) y §4 (Anexo 1), permanencia forzosa
+  origen: PUBLICO
+  impacts:
+    baja_temprana: 0.35
+    reclamo: 0.1
+  fix: null
+- id: R31_recibo_fisico_no_declarado
+  name: Recibo físico no declarado en la promesa
+  description: 'Se prometió S/ {promise_price} al mes sin declarar el recibo físico: agrega S/ {paper_invoice_fee},
+    total S/ {expected_monthly_total}.'
+  edge: promesa-registro
+  severity: media
+  strength: determinista
+  condition: forma_entrega_recibo == "fisico" and promise_price is not None and not promise_mentions_recibo
+  inputs:
+  - forma_entrega_recibo
+  - promise_price
+  - promise_mentions_recibo
+  - promise_all_inclusive
+  - paper_invoice_fee
+  - expected_monthly_total
+  message: 'Se prometió S/ {promise_price} al mes sin declarar el recibo físico: agrega S/ {paper_invoice_fee},
+    total S/ {expected_monthly_total}.'
+  source: 'docs/EVIDENCIA-PUBLICA.md §4, Anexo 1: Forma de entrega del Recibo; P-03'
+  fuente: 'docs/EVIDENCIA-PUBLICA.md §4, Anexo 1: Forma de entrega del Recibo; P-03'
+  origen: PUBLICO
+  impacts:
+    reclamo: 0.3
+    reversion_facturacion: 0.35
+  fix: null
+- id: R32_score_bajo_minimo
+  name: Score por debajo del mínimo publicado
+  description: Score registrado {score_crediticio}; mínimo publicado {min_credit_score}.
+  edge: catalogo-registro
+  severity: alta
+  strength: determinista
+  condition: score_crediticio is not None and score_crediticio < min_credit_score
+  inputs:
+  - score_crediticio
+  - min_credit_score
+  message: Score registrado {score_crediticio}; mínimo publicado {min_credit_score}.
+  source: 'docs/EVIDENCIA-PUBLICA.md §2.3, cartilla: requisitos de acceso'
+  fuente: 'docs/EVIDENCIA-PUBLICA.md §2.3, cartilla: requisitos de acceso'
+  origen: PUBLICO
+  impacts:
+    baja_temprana: 0.3
+    reversion_facturacion: 0.15
+  fix: null
+- id: R33_titular_no_verificable
+  name: No se puede verificar al firmante
+  description: La confirmación llegó al teléfono registrado y no hay evidencia de que ese número sea del firmante.
+  edge: identidad
+  severity: media
+  strength: determinista
+  condition: tenencia == "inquilino" and confirmation_status == "confirmada" and phone and not consent_evidence
+  inputs:
+  - tenencia
+  - confirmation_status
+  - phone
+  - consent_evidence
+  message: La confirmación llegó al teléfono registrado y no hay evidencia de que ese número sea del firmante.
+  source: docs/EVIDENCIA-PUBLICA.md §4, Anexo 1; CONTRATO-DE-DATOS.md §6; docs/CASOS-ADVERSARIOS.md §5 AMB-04
+  fuente: docs/EVIDENCIA-PUBLICA.md §4, Anexo 1; CONTRATO-DE-DATOS.md §6; docs/CASOS-ADVERSARIOS.md §5 AMB-04
+  origen: PUBLICO
+  impacts: {}
+  fix: null
+  abstain: true
+- id: R34_condominio_sin_unidad
+  name: Condominio sin unidad de instalación
+  description: 'El condominio {nombre_condominio} no tiene torre o departamento: no se puede dirigir la instalación
+    a una unidad.'
+  edge: registro-entrega
+  severity: media
+  strength: determinista
+  condition: nombre_condominio and (not torre or not departamento)
+  inputs:
+  - nombre_condominio
+  - torre
+  - departamento
+  message: 'El condominio {nombre_condominio} no tiene torre o departamento: no se puede dirigir la instalación
+    a una unidad.'
+  source: 'docs/EVIDENCIA-PUBLICA.md §4, Anexo 1: datos de instalación'
+  fuente: 'docs/EVIDENCIA-PUBLICA.md §4, Anexo 1: datos de instalación'
+  origen: PUBLICO
+  impacts:
+    instalacion_fallida: 0.4
+  fix: null
+- id: R35_primera_factura_no_declarada
+  name: Primera factura no declarada en la promesa
+  description: Se prometió S/ {promise_price} al mes. La primera factura incluye prorrateo + renta + cuota de instalación
+    S/ {installation_quota} + S/ {paper_invoice_fee} si el recibo es físico; esos cargos no se declararon.
+  edge: registro-entrega
+  severity: media
+  strength: determinista
+  condition: (cargo_instalacion_cuotas is not None or cargo_instalacion_costo is not None) and promise_price is
+    not None and not promise_mentions_installation_fee
+  inputs:
+  - cargo_instalacion_cuotas
+  - cargo_instalacion_costo
+  - promise_price
+  - promise_mentions_installation_fee
+  - promise_all_inclusive
+  - installation_quota
+  - paper_invoice_fee
+  - forma_entrega_recibo
+  message: Se prometió S/ {promise_price} al mes. La primera factura incluye prorrateo + renta + cuota de instalación
+    S/ {installation_quota} + S/ {paper_invoice_fee} si el recibo es físico; esos cargos no se declararon.
+  source: docs/EVIDENCIA-PUBLICA.md §2.2 y §2.6 (cartilla), §5 primera factura; P-02 y P-03
+  fuente: docs/EVIDENCIA-PUBLICA.md §2.2 y §2.6 (cartilla), §5 primera factura; P-02 y P-03
+  origen: PUBLICO
+  impacts:
+    reclamo: 0.3
+    reversion_facturacion: 0.35
+  fix: null
+- id: R36_plan_fuera_de_zona
+  name: Plan restringido a otra región
+  description: El plan {plan} aplica solo a provincias; la dirección registrada está en {address_region}.
+  edge: registro-entrega
+  severity: alta
+  strength: determinista
+  condition: plan_zones == ["provincias"] and address_region == "lima"
+  inputs:
+  - plan
+  - plan_zones
+  - address_region
+  - address
+  message: El plan {plan} aplica solo a provincias; la dirección registrada está en {address_region}.
+  source: 'docs/EVIDENCIA-PUBLICA.md §2.1 y §2.4, cartilla: 100 Mbps solo provincias'
+  fuente: 'docs/EVIDENCIA-PUBLICA.md §2.1 y §2.4, cartilla: 100 Mbps solo provincias'
+  origen: PUBLICO
+  impacts:
+    instalacion_fallida: 0.5
+  fix: null
+- id: R37_catalogo_ambiguo
+  name: Falta el catálogo que gobierna esta velocidad
+  description: La velocidad existe en superficies web, pero no en la cartilla. Sin catalogo_referencia_id no se
+    puede afirmar un defecto.
+  edge: promesa-catalogo
+  severity: media
+  strength: determinista
+  condition: catalog_ambiguous
+  inputs:
+  - velocidad_contratada
+  - promise_speed_mbps
+  - plan
+  - catalogo_referencia_id
+  message: La velocidad existe en superficies web, pero no en la cartilla. Sin catalogo_referencia_id no se puede
+    afirmar un defecto.
+  source: 'CONTRADICCIÓN: docs/EVIDENCIA-PUBLICA.md §1 y §8; docs/MODELO-DE-COSTO.md §8'
+  fuente: 'CONTRADICCIÓN: docs/EVIDENCIA-PUBLICA.md §1 y §8; docs/MODELO-DE-COSTO.md §8'
+  origen: PUBLICO
+  impacts: {}
+  fix: null
+  abstain: true
+- id: R38_promo_duracion_no_verificable
+  name: Duración promocional sin referencia verificable
+  description: La promesa indica duración promocional; las superficies difieren y falta catalogo_referencia_id para
+    verificarla.
+  edge: promesa-catalogo
+  severity: media
+  strength: determinista
+  condition: promise_promo_duration and not catalogo_referencia_id
+  inputs:
+  - promise_promo_duration
+  - catalogo_referencia_id
+  message: La promesa indica duración promocional; las superficies difieren y falta catalogo_referencia_id para
+    verificarla.
+  source: 'CONTRADICCIÓN: docs/EVIDENCIA-PUBLICA.md §1 y §8; docs/MODELO-DE-COSTO.md §8'
+  fuente: 'CONTRADICCIÓN: docs/EVIDENCIA-PUBLICA.md §1 y §8; docs/MODELO-DE-COSTO.md §8'
+  origen: PUBLICO
+  impacts: {}
+  fix: null
+  abstain: true
+- id: R39_confirmacion_tardia
+  name: Confirmación posterior a la ventana de verificación
+  description: La confirmación afirmativa llegó el {confirmation_ts}, después de {verification_window_days} días
+    desde {registered_at}.
+  edge: identidad
+  severity: media
+  strength: determinista
+  condition: confirmation_late
+  inputs:
+  - confirmation_status
+  - confirmation_ts
+  - registered_at
+  - verification_window_days
+  message: La confirmación afirmativa llegó el {confirmation_ts}, después de {verification_window_days} días desde
+    {registered_at}.
+  source: docs/MODELO-DE-COSTO.md §3 P-07; docs/CASOS-ADVERSARIOS.md §6 LIM-04; CONTRATO-DE-DATOS.md §6
+  fuente: docs/MODELO-DE-COSTO.md §3 P-07; docs/CASOS-ADVERSARIOS.md §6 LIM-04; CONTRATO-DE-DATOS.md §6
+  origen: SUPUESTO_DEMO
+  impacts:
+    instalacion_fallida: 0.4
   fix: null

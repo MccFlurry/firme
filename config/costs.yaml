@@ -1,45 +1,90 @@
 origen: SUPUESTO_DEMO
-fuente: "Plan del equipo (T1), modelo de costo esperado; requiere calibración con datos reales."
+fuente: docs/MODELO-DE-COSTO.md §3, §5 y §6; parámetros de trabajo del equipo, no historial de WIN.
 outcomes:
   instalacion_fallida:
-    cost: 120
+    cost: 80
     label: Instalación fallida
     note: camión + técnico + reprogramación
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), costos de demostración."
+    fuente: docs/MODELO-DE-COSTO.md §3 P-09
+    id: P-09
+    base_probability:
+      value: 0.05
+      id: P-08
+      origen: SUPUESTO_DEMO
+      fuente: docs/MODELO-DE-COSTO.md §3 P-08
   reclamo:
-    cost: 80
+    cost: 45
     label: Reclamo
     note: atención + gestión + nota de crédito
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), costos de demostración."
+    fuente: docs/MODELO-DE-COSTO.md §3 P-13
+    id: P-13
+    base_probability:
+      value: 0.1
+      id: P-12
+      origen: SUPUESTO_DEMO
+      fuente: docs/MODELO-DE-COSTO.md §3 P-12
   baja_temprana:
-    cost: 350
+    cost: 95
     label: Baja temprana
-    note: costo de adquisición perdido + equipo no recuperado
+    note: Costo neto de P-05, penalidad por descuento promocional (EVIDENCIA-PUBLICA §3.1)
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), costos de demostración."
+    fuente: docs/MODELO-DE-COSTO.md §3 P-11
+    id: P-11
+    base_probability:
+      value: 0.06
+      id: P-10
+      origen: SUPUESTO_DEMO
+      fuente: docs/MODELO-DE-COSTO.md §3 P-10
   reversion_facturacion:
-    cost: 60
+    cost: 58
     label: Reversión de facturación
-    note: refacturación + conciliación
+    note: Una cuota P-02 + dos recargos P-03 + gestión administrativa
     origen: SUPUESTO_DEMO
-    fuente: "Plan del equipo (T1), costos de demostración."
+    fuente: docs/MODELO-DE-COSTO.md §3 P-15
+    id: P-15
+    base_probability:
+      value: 0.15
+      id: P-14
+      origen: SUPUESTO_DEMO
+      fuente: docs/MODELO-DE-COSTO.md §3 P-14
 review:
-  cost: 15
-  minutes: 10
-  note: 10 min de analista de calidad a S/ 90/h
+  cost: 30.0
+  minutes: 12
+  cost_per_minute: 2.5
   origen: SUPUESTO_DEMO
-  fuente: "Plan del equipo (T1), costo de revisión supuesto."
-recoverability: 0.7
+  fuente: docs/MODELO-DE-COSTO.md §3 P-16 y P-17; costo derivado = minutos × costo por minuto
+  parameters:
+    minutes:
+      id: P-16
+      origen: SUPUESTO_DEMO
+      fuente: docs/MODELO-DE-COSTO.md §3 P-16
+    cost_per_minute:
+      id: P-17
+      origen: SUPUESTO_DEMO
+      fuente: docs/MODELO-DE-COSTO.md §3 P-17
+recoverability: 1.0
 thresholds:
   retain_multiple: 4
   origen: SUPUESTO_DEMO
-  fuente: "Plan del equipo (T1), corte de retención para la demo."
+  fuente: 'docs/MODELO-DE-COSTO.md §5; T10 §4: RETENER refina la familia revisar a 4 × costo de revisión'
 priors:
   call_center: 0.08
   campo: 0.12
   web: 0.04
   tienda: 0.03
   default: 0.06
-prior_impacts: {reclamo: 0.25, baja_temprana: 0.15}   # calibrated so a clean sale in any channel stays below review cost
+prior_impacts:
+  reclamo: 0.25
+  baja_temprana: 0.15
+recoverability_source:
+  origen: SUPUESTO_DEMO
+  fuente: docs/MODELO-DE-COSTO.md §6, revisión a tiempo evita el desenlace
+priors_by_seller:
+  ASESOR-014: 0.1
+priors_by_team:
+  EQUIPO-CHICLAYO-02: 0.08
+priors_source:
+  origen: SUPUESTO_DEMO
+  fuente: T10 §4 y docs/CASOS-ADVERSARIOS.md §3 BUE-05 y §6 LIM-03; calibración, nunca sanción

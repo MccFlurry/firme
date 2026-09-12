@@ -17,6 +17,7 @@
     <div class="form-actions">
       <button class="button" type="submit">Procesar lote <span aria-hidden="true">→</span></button>
       <button class="button secondary" type="submit" name="demo" value="1">Cargar los 25 casos de demo</button>
+      <button class="button secondary" type="submit" name="demo" value="adversarios">Cargar los 24 casos adversarios</button>
     </div>
     <p class="hint">Prueba con 25 ventas sintéticas o usa el ejemplo de abajo para ver cómo reconocemos columnas con otros nombres.</p>
   </form>
@@ -38,7 +39,8 @@
 {% if confusion %}
 <section class="panel">
   <h2>Matriz de confusión</h2>
-  <p class="hint">Positivo = decisión REVISAR o RETENER sobre las filas etiquetadas. Las abstenciones se cuentan aparte.</p>
+  <p class="hint">Positivo = familia revisar (REVISAR o RETENER) sobre las filas etiquetadas. Las abstenciones se cuentan aparte.</p>
+  <p>Abstenciones esperadas acertadas: <strong>{{ confusion.correct_abstentions }} / {{ confusion.expected_abstentions }}</strong></p>
   <div class="table-scroll" tabindex="0" role="region" aria-label="Matriz de confusión"><table>
     <thead><tr><th></th><th>Predijo positivo</th><th>Predijo negativo</th></tr></thead>
     <tbody>
@@ -62,15 +64,16 @@
   <div class="section-heading"><h2>Resultados</h2><span class="count">{{ results|length }}</span></div>
   <p class="hint">Ordenadas por costo recuperable por minuto de revisión.</p>
   <div class="table-scroll" tabindex="0" role="region" aria-label="Resultados del lote">
-    <table><thead><tr><th>Venta</th><th>Cliente</th><th>Plan</th><th>Decisión</th><th>Costo esperado</th><th>Regla principal</th><th>Rec/min</th></tr></thead><tbody>
+    <table><thead><tr><th>Venta</th><th>Esperado</th><th>Obtenido</th><th>Cliente</th><th>Plan</th><th>Costo esperado</th><th>Regla principal</th><th>Prioridad/min</th></tr></thead><tbody>
     {% for row in results %}{% set verdict = row.verdict %}
     <tr>
       <th scope="row"><a href="/ventas/{{ verdict.sale_id }}">{{ verdict.sale_id }}</a></th>
+      <td>{{ row.sale.extra.get('veredicto_esperado') or {'buena': 'pasa', 'mala': 'revisar'}.get(row.sale.label, 'Sin etiqueta') }}</td>
+      <td><span class="tag {{ verdict.decision|lower }}">{{ verdict.decision }} · {{ decision_labels[verdict.decision] }}</span></td>
       <td>{{ row.sale.customer_name or 'Sin nombre' }}</td>
       <td>{{ catalog.plans.get(row.sale.plan, {}).get('name', row.sale.plan) or 'Sin plan' }}</td>
-      <td><span class="tag {{ verdict.decision|lower }}">{{ verdict.decision }}</span></td>
-      <td>S/ {{ '%.2f'|format(verdict.expected_cost) }}</td>
-      <td>{{ row.main_rule.rule_name if row.main_rule else 'Sin regla' }}</td>
+      <td>{{ 'No estimable' if verdict.decision == 'ABSTENERSE' else 'S/ %.2f'|format(verdict.expected_cost) }}</td>
+      <td>{{ (row.main_rule.rule_id ~ ' · ' ~ row.main_rule.rule_name) if row.main_rule else 'Sin regla' }}</td>
       <td>S/ {{ '%.2f'|format(verdict.recoverable_per_minute) }}</td>
     </tr>
     {% endfor %}</tbody></table>

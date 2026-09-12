@@ -1,0 +1,358 @@
+[
+  {
+    "id": "BUE-01",
+    "promesa_declarada": "Plan de 200 megas a 99 soles mensuales, instalación en 6 cuotas de 20 soles",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "cargo_instalacion_costo": 120.0,
+    "cargo_instalacion_cuotas": 6,
+    "forma_entrega_recibo": "Electronico",
+    "plazo_vigencia": "Forzoso_6_meses",
+    "direccion": "Av. Simulada 100, Chiclayo",
+    "tenencia": "Propietario",
+    "telefono_1": "+51 900 000 001",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "pasa",
+    "familia": "buena",
+    "comparador": "CATÁLOGO ↔ REGISTRO",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "BUE-02",
+    "promesa_declarada": "Plan de 200 megas: 99 soles del plan más 10 soles por recibo físico, total 109 soles al mes",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "forma_entrega_recibo": "Fisico",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "pasa",
+    "familia": "buena",
+    "comparador": "PROMESA ↔ REGISTRO · precio total",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "BUE-03",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "tenencia": "Inquilino",
+    "cliente_documento": "SIM-00000003",
+    "confirmacion_titular": "confirmada",
+    "confirmacion_titular_ts": "2026-09-10T11:20:00-05:00",
+    "veredicto_esperado": "pasa",
+    "familia": "buena",
+    "comparador": "verificación de titularidad",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "BUE-04",
+    "promesa_declarada": "Plan de 100 megas a 79 soles",
+    "velocidad_contratada": 100,
+    "precio_mensual": 79.0,
+    "direccion": "Calle Simulada 250, Chiclayo",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "pasa",
+    "familia": "buena",
+    "comparador": "combinación producto / zona",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "BUE-05",
+    "velocidad_contratada": 300,
+    "precio_mensual": 119.0,
+    "nombre_asesor": "ASESOR-014",
+    "equipo": "EQUIPO-CHICLAYO-02",
+    "forma_entrega_recibo": "Electronico",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "pasa",
+    "familia": "buena",
+    "comparador": "cohorte por asesor",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "DEF-01",
+    "promesa_declarada": "Plan de 200 megas a 85 soles mensuales",
+    "velocidad_contratada": 200,
+    "precio_mensual": 85.0,
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "revisar",
+    "familia": "defectuosa",
+    "comparador": "CATÁLOGO ↔ REGISTRO · precio",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "DEF-02",
+    "promesa_declarada": "Plan de 450 megas",
+    "velocidad_contratada": 450,
+    "precio_mensual": 139.0,
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "revisar",
+    "familia": "defectuosa",
+    "comparador": "CATÁLOGO ↔ REGISTRO · velocidad",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "DEF-03",
+    "promesa_declarada": "Sin permanencia, el cliente se puede ir cuando quiera",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "plazo_vigencia": "Forzoso_6_meses",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "revisar",
+    "familia": "defectuosa",
+    "comparador": "PROMESA ↔ REGISTRO · permanencia",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "DEF-04",
+    "promesa_declarada": "99 soles al mes, todo incluido",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "forma_entrega_recibo": "Fisico",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "revisar",
+    "familia": "defectuosa",
+    "comparador": "PROMESA ↔ REGISTRO · precio total",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "DEF-05",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "cliente_documento": "SIM-00000005",
+    "telefono_1": "+51 900 000 005",
+    "confirmacion_titular": "negada",
+    "confirmacion_titular_ts": "2026-09-11T09:05:00-05:00",
+    "veredicto_esperado": "revisar",
+    "familia": "defectuosa",
+    "comparador": "verificación de titularidad",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "DEF-06",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "cliente_documento": "SIM-00000006",
+    "telefono_1": "+51 900 000 001",
+    "direccion": "Jr. Simulado 410, Chiclayo",
+    "nombre_asesor": "ASESOR-027",
+    "confirmacion_titular": "enviada",
+    "veredicto_esperado": "revisar",
+    "familia": "defectuosa",
+    "comparador": "colisión de identidad",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "DEF-07",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "score_crediticio": 178,
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "revisar",
+    "familia": "defectuosa",
+    "comparador": "condiciones de acceso publicadas",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "DEF-08",
+    "promesa_declarada": "Plan de 400 megas con dos routers mesh incluidos sin costo",
+    "velocidad_contratada": 400,
+    "precio_mensual": 129.0,
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "revisar",
+    "familia": "defectuosa",
+    "comparador": "PROMESA ↔ CATÁLOGO",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "AMB-01",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "telefono_1": "+51 900 000 011",
+    "confirmacion_titular": "no_respondida",
+    "confirmacion_titular_ts": null,
+    "veredicto_esperado": "revisar",
+    "familia": "ambigua",
+    "comparador": "verificación de titularidad",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "AMB-02",
+    "promesa_declarada": "Plan de 300 megas a 119 soles",
+    "velocidad_contratada": 300,
+    "precio_mensual": 119.0,
+    "confirmacion_titular": "confirmada_con_correccion",
+    "confirmacion_titular_ts": "2026-09-11T18:40:00-05:00",
+    "veredicto_esperado": "revisar",
+    "familia": "ambigua",
+    "comparador": "verificación de titularidad",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "AMB-03",
+    "promesa_declarada": "Plan de 850 megas a 119 soles",
+    "velocidad_contratada": 850,
+    "precio_mensual": 119.0,
+    "catalogo_referencia_id": null,
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "abstención",
+    "familia": "ambigua",
+    "comparador": "PROMESA ↔ CATÁLOGO",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "AMB-04",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "tenencia": "Inquilino",
+    "cliente_documento": "SIM-00000014",
+    "telefono_1": "+51 900 000 014",
+    "confirmacion_titular": "confirmada",
+    "confirmacion_titular_ts": "2026-09-11T12:00:00-05:00",
+    "veredicto_esperado": "abstención",
+    "familia": "ambigua",
+    "comparador": "verificación de titularidad",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "AMB-05",
+    "promesa_declarada": "Precio promocional por seis meses y después sube",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "catalogo_referencia_id": null,
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "abstención",
+    "familia": "ambigua",
+    "comparador": "PROMESA ↔ CATÁLOGO",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "AMB-06",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "direccion": "Av. Simulada 900, Chiclayo",
+    "nombre_condominio": "Condominio Simulado",
+    "torre": null,
+    "departamento": null,
+    "cliente_documento": "SIM-00000016",
+    "confirmacion_titular": "enviada",
+    "veredicto_esperado": "revisar",
+    "familia": "ambigua",
+    "comparador": "colisión de dirección",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "LIM-01",
+    "promesa_declarada": "39.50 al mes por el plan de 100 megas",
+    "velocidad_contratada": 100,
+    "precio_mensual": 39.5,
+    "plazo_vigencia": "Forzoso_6_meses",
+    "cargo_instalacion_costo": 120.0,
+    "cargo_instalacion_cuotas": 6,
+    "forma_pago": "Mes_Vencido",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "revisar",
+    "familia": "límite",
+    "comparador": "REGISTRO ↔ ENTREGABLE · primera factura",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "LIM-02",
+    "promesa_declarada": "Plan de 400 megas a 129 soles",
+    "velocidad_contratada": 400,
+    "precio_mensual": 129.0,
+    "forma_entrega_recibo": "Electronico",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "pasa",
+    "familia": "límite",
+    "comparador": "CATÁLOGO ↔ REGISTRO · precio",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "LIM-03",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "nombre_asesor": "ASESOR-014",
+    "equipo": "EQUIPO-CHICLAYO-02",
+    "telefono_2": null,
+    "correo_electronico": null,
+    "forma_entrega_recibo": "Electronico",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "pasa",
+    "familia": "límite",
+    "comparador": "cohorte por asesor",
+    "extra": {
+      "simulado": true
+    }
+  },
+  {
+    "id": "LIM-04",
+    "velocidad_contratada": 200,
+    "precio_mensual": 99.0,
+    "plazo_estimado_instalacion": 30,
+    "confirmacion_titular": "confirmada",
+    "confirmacion_titular_ts": "2026-09-12T08:15:00-05:00",
+    "veredicto_esperado": "revisar",
+    "familia": "límite",
+    "comparador": "verificación de titularidad",
+    "extra": {
+      "simulado": true,
+      "nota_demo": "Ancla temporal añadida según T10 §8: el banco omite fecha_hora_registro; se usa 2026-08-30T10:00:00-05:00 para contrastar la respuesta con P-07 (10 días)."
+    },
+    "fecha_hora_registro": "2026-08-30T10:00:00-05:00"
+  },
+  {
+    "id": "LIM-05",
+    "promesa_declarada": "Plan de 100 megas a 79 soles",
+    "velocidad_contratada": 100,
+    "precio_mensual": 79.0,
+    "direccion": "Av. Simulada 55, Lima",
+    "confirmacion_titular": "confirmada",
+    "veredicto_esperado": "revisar",
+    "familia": "límite",
+    "comparador": "combinación producto / zona",
+    "extra": {
+      "simulado": true
+    }
+  }
+]

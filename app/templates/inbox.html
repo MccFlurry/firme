@@ -6,9 +6,9 @@
 <section class="panel"><div class="section-heading"><h2>{{ recipient }}</h2><span class="count">{{ items|length }} pendientes</span></div>
   {% for item in items %}{% set verdict = item.verdict %}
   <article class="inbox-item">
-    <div class="section-heading"><h3><a href="/ventas/{{ verdict.sale_id }}">{{ verdict.sale_id }} · {{ item.sale.customer_name or 'Cliente sin nombre' }}</a></h3><span class="tag {{ verdict.decision|lower }}">{{ verdict.decision }}</span></div>
+    <div class="section-heading"><h3><a href="/ventas/{{ verdict.sale_id }}">{{ verdict.sale_id }} · {{ item.sale.customer_name or 'Cliente sin nombre' }}</a></h3><span class="tag {{ verdict.decision|lower }}">{{ verdict.decision }} · {{ decision_labels[verdict.decision] }}</span></div>
     <p>{{ verdict.alert.action }}</p>
-    <div class="metrics"><div><span>Recuperable por minuto</span><strong>S/ {{ '%.2f'|format(verdict.recoverable_per_minute) }}</strong></div><div><span>Costo esperado</span><strong>S/ {{ '%.2f'|format(verdict.expected_cost) }}</strong></div><div><span>Urgencia</span><strong>{{ verdict.alert.urgency }}</strong></div></div>
+    <div class="metrics"><div><span>{{ 'Prioridad por minuto' if verdict.decision == 'ABSTENERSE' else 'Recuperable por minuto' }}</span><strong>S/ {{ '%.2f'|format(verdict.recoverable_per_minute) }}</strong></div><div><span>Costo esperado</span><strong>{{ 'No estimable' if verdict.decision == 'ABSTENERSE' else 'S/ %.2f'|format(verdict.expected_cost) }}</strong></div><div><span>Urgencia</span><strong>{{ verdict.alert.urgency }}</strong></div></div>
     <div class="section-heading"><p class="{{ 'overdue' if item.overdue else '' }}"><strong>{{ item.remaining }}</strong><br><small>Plazo: {{ verdict.alert.deadline|date_es }}</small></p><form method="post" action="/bandeja/{{ verdict.sale_id }}/hecho"><button class="button secondary" type="submit" aria-label="Marcar aviso {{ verdict.sale_id }} como hecho">Hecho</button></form></div>
   </article>
   {% endfor %}

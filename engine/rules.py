@@ -25,7 +25,13 @@ def evaluate_rules(facts: dict, rules: list[dict]) -> list[Evidence]:
                 rule_id=rule["id"], rule_name=rule["name"], edge=rule["edge"],
                 condition=rule["condition"], values={key: facts.get(key) for key in rule["inputs"]},
                 severity=rule["severity"], strength=rule["strength"],
-                message=rule["message"].format(**facts), source=rule["source"],
-                origin=rule["origen"], impacts=rule["impacts"],
+                message=rule["message"].format(**facts),
+                source=(facts["unsupported_claim_source"] or rule["source"])
+                if rule["id"] == "R23_promesa_insostenible" else rule["source"],
+                origin=facts["unsupported_claim_origin"] if rule["id"] == "R23_promesa_insostenible" else rule["origen"],
+                impacts=rule["impacts"],
             ))
+    abstentions = {rule["id"] for rule in rules if rule.get("abstain")}
+    evidence.sort(key=lambda item: (item.severity == "bloqueante", item.rule_id in abstentions,
+                                   SEVERITIES.index(item.severity)), reverse=True)
     return evidence

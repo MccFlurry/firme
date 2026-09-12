@@ -19,13 +19,16 @@ def calculate_cost(evidence: list[Evidence], prior: float, costs: dict) -> tuple
     return probabilities, amounts, sum(amounts.values())
 
 
-def decide(facts: dict, evidence: list[Evidence], expected_cost: float, costs: dict) -> tuple[Decision, str | None]:
-    if facts["plan"] is None and facts["price"] is None:
-        return "ABSTENERSE", "Faltan plan y precio; no se puede contrastar la oferta registrada."
-    if not any(facts[field] for field in ("customer_doc", "phone", "email")):
-        return "ABSTENERSE", "No hay documento, teléfono ni correo para identificar al cliente."
+def decide(facts: dict, evidence: list[Evidence], expected_cost: float, costs: dict,
+           rules: list[dict] = ()) -> tuple[Decision, str | None]:
     if any(item.severity == "bloqueante" for item in evidence):
         return "RETENER", None
+    abstentions = {rule["id"] for rule in rules if rule.get("abstain")}
+    for item in evidence:
+        if item.rule_id in abstentions:
+            return "ABSTENERSE", item.message
+    if facts["plan"] is None or facts["price"] is None:
+        return "ABSTENERSE", "Falta plan o precio; no se puede contrastar la oferta registrada."
     if expected_cost >= costs["thresholds"]["retain_multiple"] * costs["review"]["cost"]:
         return "RETENER", None
     if expected_cost >= costs["review"]["cost"]:
@@ -34,15 +37,19 @@ def decide(facts: dict, evidence: list[Evidence], expected_cost: float, costs: d
 
 
 def make_alert(sale: Sale, ctx: Context, decision: Decision, evidence: list[Evidence], settings: dict) -> Alert | None:
-    if decision not in {"REVISAR", "RETENER"}:
+    if decision not in {"REVISAR", "RETENER", "ABSTENERSE"}:
         return None
     installation = parse_datetime(sale.install_date, settings)
     if installation is None:
-        installation = current_time(ctx, settings) + timedelta(hours=settings["install_window_hours"])
+        installation = (parse_datetime(sale.registered_at, settings) or current_time(ctx, settings)) + timedelta(
+            days=settings["install_ceiling_days"])
     deadline = (installation - timedelta(hours=settings["alert_buffer_hours"])).isoformat()
     if decision == "RETENER":
         return Alert(recipient="Despacho e instalaciones + Supervisor de ventas", urgency="alta", deadline=deadline,
                      action="No despachar. Verificar con el cliente por el enlace de confirmación.")
+    if decision == "ABSTENERSE":
+        return Alert(recipient="Calidad de venta", urgency="media", deadline=deadline,
+                     action="Completar la evidencia o identificar el catálogo de referencia antes de calificar la venta.")
     strongest = max(evidence, key=lambda item: SEVERITIES.index(item.severity), default=None)
     field = f"los datos de «{strongest.rule_name}»" if strongest else "los datos acordados"
     return Alert(recipient="Calidad de venta", urgency="media", deadline=deadline,

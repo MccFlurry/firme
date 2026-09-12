@@ -20,6 +20,7 @@ from app.services import evaluate_and_store, verdict_explanation
 from contracts.types import Event, Sale, Verdict
 from engine import llm
 from engine.ingest import parse
+from engine.facts import CONFIRMATION_STATES
 from engine.rules import load_config
 
 APP_DIR = Path(__file__).resolve().parent
@@ -47,6 +48,12 @@ EVENT_LABELS = {
     "corregida": "Corrección solicitada", "desconocida": "Servicio no reconocido", "silencio": "Sin respuesta",
 }
 templates.env.globals.update(field_labels=FIELD_LABELS, strength_labels=STRENGTH_LABELS, event_labels=EVENT_LABELS)
+DECISION_LABELS = {"APROBAR": "pasa", "REVISAR": "revisar", "RETENER": "revisar (prioridad máxima)",
+                   "ABSTENERSE": "abstención"}
+CONFIRMATION_LABELS = {"no_enviada": "No enviada", "enviada": "Pendiente", "no_respondida": "Sin respuesta",
+                       "confirmada": "Confirmada", "confirmada_con_correccion": "Corrección solicitada",
+                       "negada": "Servicio no reconocido"}
+templates.env.globals.update(decision_labels=DECISION_LABELS, confirmation_labels=CONFIRMATION_LABELS)
 
 
 def now():
@@ -187,10 +194,13 @@ def show_verdict(request: Request, sale_id: str):
     verdict = Verdict.model_validate(state["verdicts"][sale_id])
     explanation = verdict_explanation(sale, verdict)
     confirmation = state["confirmations"].get(sale_id)
+    canonical_status = next((key for key, value in CONFIRMATION_STATES.items()
+                             if value == confirmation["status"]), None) if confirmation else sale.extra.get("confirmacion_titular")
     return templates.TemplateResponse(request=request, name="verdict.html", context={
         "sale": sale, "verdict": verdict, "costs": load_config("costs"), "catalog": load_config("catalog"),
         "events": [item for item in state["events"] if item["sale_id"] == sale_id],
         "confirmation": confirmation,
+        "canonical_status": canonical_status,
         "explanation": explanation,
         "confirmation_url": str(request.base_url) + "c/" + confirmation["token"] if confirmation else None,
     })
@@ -251,32 +261,36 @@ def health():
 
 
 DEMO_PATH = Path(__file__).resolve().parent.parent / "data" / "cases.json"
+ADVERSARIAL_PATH = DEMO_PATH.with_name("casos-adversarios.json")
 SEVERITY_ORDER = ("baja", "media", "alta", "bloqueante")
 
 
 def batch_example():
     return [
         {"customer": "Ana Quispe", "phone_number": "912345678", "monthly_price": 99.00,
-         "plan_name": "Fibra 500", "label": "buena"},
+         "plan_name": "Fibra 200", "label": "buena"},
         {"customer": "Luis Paredes", "phone_number": "923456789", "monthly_price": 40.00,
-         "plan_name": "Fibra 750", "label": "mala"},
-        {"customer": "Rosa Díaz", "phone_number": "934567890", "monthly_price": 59.50,
-         "plan_name": "Fibra 850", "label": "buena"},
+         "plan_name": "Fibra 300", "label": "mala"},
+        {"customer": "Rosa Díaz", "phone_number": "934567890", "monthly_price": 169.00,
+         "plan_name": "Fibra 600", "label": "buena"},
         {"customer": "Jorge Salas", "phone_number": "945678901", "monthly_price": 50.00,
          "plan_name": "Fibra 1000", "label": "mala"},
         {"customer": "Mía Castro", "phone_number": "956789012", "monthly_price": 99.00,
-         "plan_name": "Fibra 500", "label": "buena"},
+         "plan_name": "Fibra 200", "label": "buena"},
     ]
 
 
 def main_evidence(verdict):
-    return max(verdict.evidence, key=lambda item: SEVERITY_ORDER.index(item.severity), default=None)
+    return next(iter(verdict.evidence), None)
 
 
 def confusion_matrix(rows):
-    tp = fp = tn = fn = abstained = labelled = 0
+    tp = fp = tn = fn = abstained = labelled = expected_abstentions = correct_abstentions = 0
     for row in rows:
         verdict, sale = row["verdict"], row["sale"]
+        if sale.extra.get("veredicto_esperado") == "abstención":
+            expected_abstentions += 1
+            correct_abstentions += verdict.decision == "ABSTENERSE"
         if verdict.decision == "ABSTENERSE":
             abstained += 1
             continue
@@ -295,7 +309,8 @@ def confusion_matrix(rows):
     precision = tp / (tp + fp) if tp + fp else None
     recall = tp / (tp + fn) if tp + fn else None
     return {"tp": tp, "fp": fp, "tn": tn, "fn": fn, "precision": precision,
-            "recall": recall, "labelled": labelled, "abstained": abstained}
+            "recall": recall, "labelled": labelled, "abstained": abstained,
+            "expected_abstentions": expected_abstentions, "correct_abstentions": correct_abstentions}
 
 
 def render_batch(request, results=None, report=None, confusion=None, error=None, status_code=200, reading=None):
@@ -316,7 +331,7 @@ def batch_form(request: Request):
 async def batch_submit(request: Request, payload: str = Form(""), file: UploadFile | None = File(None),
                        demo: str = Form("")):
     if demo:
-        content, filename = DEMO_PATH.read_text(encoding="utf-8"), None
+        content, filename = (ADVERSARIAL_PATH if demo == "adversarios" else DEMO_PATH).read_text(encoding="utf-8"), None
     elif file is not None and file.filename:
         content, filename = await file.read(), file.filename
     else:
@@ -356,7 +371,7 @@ async def batch_submit(request: Request, payload: str = Form(""), file: UploadFi
     rows = [{"verdict": verdict, "sale": Sale.model_validate(state["sales"][verdict.sale_id]),
              "main_rule": main_evidence(verdict)} for verdict in verdicts]
     rows.sort(key=lambda item: item["verdict"].recoverable_per_minute, reverse=True)
-    confusion = confusion_matrix(rows) if any(row["sale"].label for row in rows) else None
+    confusion = confusion_matrix(rows) if any(row["sale"].label or row["sale"].extra.get("veredicto_esperado") for row in rows) else None
 
     def summarize():
         return {"text": llm.summarize_batch(rows), **llm.describe()}
