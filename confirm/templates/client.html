@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163d38">
+  <title>Confirma tu servicio · Prometido</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <style>
+    body { display: grid; place-items: center; min-height: 100vh; padding: 1rem; }
+    .client { width: 100%; max-width: 520px; }
+    .client h1 { font-size: 1.9rem; margin: .4rem 0 .8rem; }
+    .offer { font-size: 1.05rem; }
+    .big { width: 100%; min-height: 58px; font-size: 1.05rem; margin-top: .75rem; white-space: normal; }
+    .big.danger { background: #912e29; border-color: #912e29; }
+    .big.danger:hover { background: #7c2621; }
+    .client textarea { min-height: 96px; }
+    .client-meta { font-size: .78rem; color: var(--muted); text-align: center; margin-top: 1.4rem; }
+  </style>
+</head>
+<body>
+  <span class="watermark">SIMULADO</span>
+  <main class="client">
+    <form method="post" action="/c/{{ confirmation.token }}">
+      <section class="panel">
+        <p class="eyebrow">Prometido</p>
+        <h1>¿Es esto lo que acordaste?</h1>
+        <p class="offer">{{ text }}</p>
+        <p class="hint">{{ 'Capa LLM: activa' if mode == 'llm' else 'Capa LLM: no disponible, comparador determinista' }}</p>
+      </section>
+      <button class="button big" type="submit" name="status" value="confirmada">Sí, es lo que acordé</button>
+      <section class="panel">
+        <label for="note">Si hay algo que corregir, escríbelo aquí</label>
+        <textarea id="note" name="note" placeholder="Ejemplo: me dijeron que la instalación era mañana, no en tres días…"></textarea>
+        <button class="button secondary big" type="submit" name="status" value="corregida">Quiero corregir algo</button>
+      </section>
+      <button class="button big danger" type="submit" name="status" value="desconocida">No pedí este servicio</button>
+      <p class="client-meta">Demostración con datos sintéticos. Este enlace no representa una oferta comercial real.</p>
+    </form>
+  </main>
+</body>
+</html>
