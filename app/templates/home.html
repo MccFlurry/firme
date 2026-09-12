@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar venta' if sale else 'Nueva venta' }} · Prometido{% endblock %}
+{% macro input(field, type='text', placeholder='', step=none) %}
+<label>{{ field_labels[field] }}
+  <input name="{{ field }}" type="{{ type }}" value="{{ values.get(field) if values.get(field) is not none else '' }}" placeholder="{{ placeholder }}" {% if type == 'number' %}min="0"{% endif %} {% if step %}step="{{ step }}"{% endif %} {% if type in ['text', 'tel', 'email'] %}maxlength="500"{% endif %}>
+</label>
+{% endmacro %}
+{% macro select(field, options, empty='Sin indicar') %}
+<label>{{ field_labels[field] }}
+  <select name="{{ field }}">
+    <option value="">{{ empty }}</option>
+    {% if values.get(field) and values[field] not in options %}<option value="{{ values[field] }}" selected>{{ values[field] }}</option>{% endif %}
+    {% for key, label in options.items() %}<option value="{{ key }}" {% if values.get(field) == key %}selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+</label>
+{% endmacro %}
+{% block content %}
+<div class="page-heading">
+  <p class="eyebrow">{{ sale.id if sale else 'Promesa → catálogo → registro → entrega' }}</p>
+  <h1>{{ 'Revisar lo registrado.' if sale else 'Una buena venta empieza con una promesa clara.' }}</h1>
+  <p>{{ 'Actualiza los datos y vuelve a evaluar. Cada cambio queda en el historial.' if sale else 'Compara lo ofrecido con lo registrado y descubre qué necesita atención antes de instalar.' }}</p>
+</div>
+{% if error %}<div class="notice error" role="alert"><strong>No se guardaron los cambios.</strong> {{ error }}</div>{% endif %}
+<div class="form-layout">
+  <form class="sale-form" id="sale-form" action="{{ '/ventas/' ~ sale.id ~ '/editar' if sale else '/ventas' }}" method="post" data-editing="{{ 'true' if sale else 'false' }}">
+    <section class="panel">
+      <div class="section-heading"><h2><span class="step">01</span> Lo acordado</h2>{% if not sale %}<button class="button secondary" type="button" id="load-example">Cargar ejemplo</button>{% endif %}</div>
+      <label for="promise-text">Lo que se ofreció al cliente</label>
+      <textarea id="promise-text" name="promise_text" rows="4" maxlength="10000" placeholder="Ej.: Fibra 200 Mbps a S/ 79.90 al mes. Instalación en 1 día." aria-describedby="promise-help">{{ values.get('promise_text') or '' }}</textarea>
+      <p class="hint" id="promise-help">Escribe la promesa tal como se explicó al cliente. Se extraerán el plan, el precio y las condiciones que puedan reconocerse.</p>
+      <div class="fields">
+        {{ input('seller_id', placeholder='Ej.: VEN-001') }}
+        {{ select('channel', channels) }}
+      </div>
+    </section>
+    <section class="panel">
+      <h2><span class="step">02</span> Cliente y consentimiento</h2>
+      <div class="fields">
+        {{ input('customer_name', placeholder='Nombre sintético') }}
+        {{ input('customer_doc', placeholder='Documento sintético') }}
+        {{ input('phone', 'tel', '900000001') }}
+        {{ input('email', 'email', 'cliente@example.com') }}
+        {{ input('address', placeholder='Dirección sintética') }}
+        {% set districts = {} %}{% for key, item in catalog.coverage.items() %}{% set _ = districts.update({key: item.get('name', {'jose_leonardo_ortiz': 'José Leonardo Ortiz', 'monsefu': 'Monsefú'}.get(key, key.replace('_', ' ').title()))}) %}{% endfor %}
+        {{ select('district', districts) }}
+        {{ select('consent_evidence', {'grabacion': 'Grabación', 'firma': 'Firma', 'sms': 'SMS'}, 'Sin evidencia') }}
+      </div>
+      <p class="hint">Para identificar la venta se necesita al menos un documento, un teléfono o un correo. Utiliza datos sintéticos en esta demostración.</p>
+    </section>
+    <section class="panel">
+      <h2><span class="step">03</span> Oferta registrada</h2>
+      <div class="fields">
+        {% set plans = {} %}{% for key, item in catalog.plans.items() %}{% set _ = plans.update({key: item.name ~ ' · S/ ' ~ ('%.2f'|format(item.price))}) %}{% endfor %}
+        {{ select('plan', plans) }}
+        {{ input('price', 'number', '79.90', '0.01') }}
+        {% set promos = {} %}{% for key, item in catalog.promos.items() %}{% set _ = promos.update({key: item.name}) %}{% endfor %}
+        {{ select('promo', promos, 'Sin promoción') }}
+        {{ input('install_date', 'datetime-local', step='any') }}
+        {{ input('registered_at', 'datetime-local', step='any') }}
+      </div>
+      <p class="hint">Fechas en hora de Perú. Si no indicas el registro, se usará la hora de envío para una venta nueva.</p>
+      <p class="hint">Catálogo <span class="tag">{{ catalog.origen }}</span> {{ catalog.fuente }}</p>
+    </section>
+    <details class="panel">
+      <summary>Datos adicionales de demostración</summary>
+      {{ select('label', {'buena': 'Buena', 'mala': 'Mala'}, 'Sin etiqueta') }}
+      <label for="extra">Datos adicionales (objeto JSON)</label>
+      <textarea id="extra" name="extra" rows="4" spellcheck="false" placeholder='{"billing_amount": 79.90}'>{{ values.get('extra') or '' }}</textarea>
+      <p class="hint">Puedes indicar el monto a facturar mediante <code>billing_amount</code> para compararlo con el precio registrado. La etiqueta no modifica la evaluación.</p>
+      {% if sale %}<p>Tiempo de llenado original: {{ sale.fill_seconds if sale.fill_seconds is not none else 'sin medir' }} segundos.</p>{% endif %}
+    </details>
+    <input type="hidden" name="fill_seconds" value="{{ values.get('fill_seconds') if values.get('fill_seconds') is not none else '' }}">
+    <div class="form-actions">
+      <button class="button" type="submit">{{ 'Guardar y reevaluar' if sale else 'Evaluar venta' }} <span aria-hidden="true">→</span></button>
+      {% if sale %}<a class="button secondary" href="/ventas/{{ sale.id }}">Cancelar</a>{% else %}<span class="hint" id="fill-status">Tiempo de llenado desde el primer campo.</span>{% endif %}
+    </div>
+  </form>
+  <aside class="panel guide">
+    <p class="eyebrow">Una decisión explicable</p>
+    <h2>Lo que verás al evaluar</h2>
+    <ol><li>Qué coincide y qué necesita revisión.</li><li>La regla, sus valores y su fuente.</li><li>El costo esperado en soles.</li><li>Qué ajuste podría cambiar la decisión.</li></ol>
+    <hr>
+    <p>Los campos vacíos se explican en el resultado. Si falta lo esencial, el sistema se abstiene.</p>
+    <p class="hint" id="example-status" role="status"></p>
+  </aside>
+</div>
+{% if not sale %}<script type="application/json" id="sale-example">{{ example|tojson }}</script>{% endif %}
+{% endblock %}

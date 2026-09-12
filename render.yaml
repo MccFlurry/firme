@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: prometido
+    runtime: docker
+    plan: free
+    healthCheckPath: /salud
+    # ponytail: free instances have ephemeral storage; use a disk if demo state must survive restarts.

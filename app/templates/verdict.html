@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ sale.id }} · {{ verdict.decision }} · Prometido{% endblock %}
+{% block content %}
+<div class="section-heading page-heading">
+  <div><p class="eyebrow">Evaluación · {{ sale.id }}</p><h1>{{ sale.customer_name or 'Cliente sin nombre' }}</h1><p>{{ catalog.plans.get(sale.plan, {}).get('name', sale.plan) or 'Plan sin indicar' }} · {{ sale.seller_id or 'Vendedor sin indicar' }}</p></div>
+  <a class="button secondary" href="/ventas/{{ sale.id }}/editar">Editar</a>
+</div>
+<section class="panel decision {{ verdict.decision|lower }}">
+  <p class="eyebrow">Decisión de la evaluación</p>
+  <h2 class="decision-title">{{ verdict.decision }}</h2>
+  {% if verdict.abstain_reason %}<p>{{ verdict.abstain_reason }}</p>{% endif %}
+  <div class="metrics">
+    <div><span>Costo esperado</span><strong>S/ {{ '%.2f'|format(verdict.expected_cost) }}</strong></div>
+    <div><span>Costo de revisión</span><strong>S/ {{ '%.2f'|format(verdict.review_cost) }}</strong></div>
+    <div><span>Recuperable por minuto</span><strong>S/ {{ '%.2f'|format(verdict.recoverable_per_minute) }}</strong></div>
+  </div>
+  <p>La revisión se justifica cuando el costo esperado alcanza el costo de revisar; se retiene desde {{ costs.thresholds.retain_multiple }} veces ese costo o ante una evidencia bloqueante.</p>
+  <p class="hint">Modelo de costos <span class="tag">{{ costs.origen }}</span> {{ costs.fuente }}</p>
+</section>
+<div class="notice" data-llm-mode="{{ verdict.llm_mode }}"><strong>{{ 'Capa LLM: activa' if verdict.llm_mode == 'llm' else 'Capa LLM: no disponible, comparador determinista' }}</strong><span> La decisión se calcula con las reglas y los costos configurados.</span></div>
+<div class="two-columns">
+  <section class="panel">
+    <h2>Costo por desenlace</h2>
+    <p class="hint">Probabilidad × costo del desenlace = aporte al costo esperado. Incluye la calibración por canal; no es una sanción al vendedor.</p>
+    <div class="table-scroll" tabindex="0" role="region" aria-label="Desglose del costo esperado">
+      <table><thead><tr><th>Desenlace</th><th>Probabilidad</th><th>Costo</th><th>Aporte</th></tr></thead><tbody>
+        {% for key, probability in verdict.outcome_probs.items() %}
+        <tr><th scope="row">{{ costs.outcomes[key].label }} <span class="tag">{{ costs.outcomes[key].origen }}</span></th><td>{{ '%.1f'|format(probability * 100) }} %</td><td>S/ {{ '%.2f'|format(costs.outcomes[key].cost) }}</td><td>S/ {{ '%.2f'|format(verdict.outcome_costs[key]) }}</td></tr>
+        {% endfor %}
+      </tbody><tfoot><tr><th colspan="3">Total esperado</th><td>S/ {{ '%.2f'|format(verdict.expected_cost) }}</td></tr></tfoot></table>
+    </div>
+  </section>
+  <section class="panel" id="counterfactual">
+    <p class="eyebrow">Qué tendría que cambiar</p><h2>Contrafáctico</h2>
+    {% if verdict.counterfactual %}
+      <p>{{ verdict.counterfactual.text }}</p>
+      {% for change in verdict.counterfactual.changes %}<div class="change"><strong>{{ field_labels.get(change.field, change.field) }}</strong><p>{{ change['from'] if change['from'] is not none else 'Sin indicar' }} → {{ change.to if change.to is not none else 'Sin indicar' }}</p><small>{{ change.reason }}</small></div>{% endfor %}
+      <p><span class="tag {{ verdict.counterfactual.resulting_decision|lower }}">{{ verdict.counterfactual.resulting_decision }}</span> Costo resultante: <strong>S/ {{ '%.2f'|format(verdict.counterfactual.resulting_cost) }}</strong></p>
+      <p class="hint">Escenario de comprobación. No modifica la venta ni autoriza cambiar las condiciones comerciales.</p>
+    {% else %}<p>La venta puede avanzar. No se requieren ajustes con la información disponible.</p>{% endif %}
+  </section>
+</div>
+<section class="panel" id="evidence">
+  <div class="section-heading"><div><p class="eyebrow">Qué no coincide con qué</p><h2>Cadena de evidencia <span class="count">{{ verdict.evidence|length }}</span></h2></div><p>Severidad: <strong>{{ verdict.severity or 'sin señales' }}</strong> · Fuerza: <strong>{{ strength_labels.get(verdict.strength, 'sin señales') }}</strong></p></div>
+  {% for evidence in verdict.evidence %}
+  <article class="evidence" data-rule-id="{{ evidence.rule_id }}" data-origin="{{ evidence.origin }}">
+    <div class="section-heading"><h3>{{ evidence.rule_name }} <span class="tag">{{ evidence.origin }}</span></h3><span class="tag">{{ evidence.severity }} × {{ strength_labels[evidence.strength] }}</span></div>
+    <p>{{ evidence.message }}</p>
+    <p class="hint"><code>{{ evidence.rule_id }}</code> · {{ {'promesa-catalogo': 'Promesa ↔ catálogo', 'promesa-registro': 'Promesa ↔ registro', 'catalogo-registro': 'Catálogo ↔ registro', 'registro-entrega': 'Registro ↔ entrega', 'identidad': 'Identidad', 'senal': 'Señal'}.get(evidence.edge, evidence.edge) }}</p>
+    <details open><summary>Condición y valores utilizados</summary><pre>{{ evidence.condition }}</pre>
+      <dl class="facts">{% for key, value in evidence['values'].items() %}<div><dt>{{ key }}</dt><dd>{{ value if value is not none else 'Sin dato' }}</dd></div>{% endfor %}</dl>
+    </details>
+    <p class="source"><strong>Fuente:</strong> {{ evidence.source }}</p>
+  </article>
+  {% else %}<p>No se dispararon reglas con los datos disponibles.</p>{% endfor %}
+</section>
+<div class="two-columns">
+  <section class="panel"><h2>Promesa normalizada</h2>
+    {% if verdict.promise %}
+    <blockquote>{{ verdict.promise.raw_text or sale.promise_text or 'Promesa estructurada' }}</blockquote>
+    <dl class="facts">{% for key, value in verdict.promise.model_dump().items() if key != 'raw_text' %}
+      <div><dt>{{ field_labels.get(key, key) }}</dt><dd>{% if value is none or value == [] %}Sin dato{% elif key == 'source' %}{{ {'llm': 'LLM', 'deterministic': 'Comparador determinista', 'structured': 'Datos estructurados'}.get(value, value) }}{% elif key == 'plan' %}{{ catalog.plans.get(value, {}).get('name', value) }}{% elif key == 'promo' %}{{ catalog.promos.get(value, {}).get('name', value) }}{% elif key == 'claims' %}{{ value|join(', ') }}{% else %}{{ value }}{% endif %}</dd></div>
+    {% endfor %}</dl>
+    {% else %}<p>No se proporcionó una promesa para comparar.</p>{% endif %}
+  </section>
+  <section class="panel"><h2>Campos faltantes</h2><p class="hint">Estos datos ausentes o no válidos limitan la evaluación.</p>
+    <ul>{% for field in verdict.missing_fields %}<li>{{ field_labels.get(field, field) }}</li>{% else %}<li>No faltan campos para los comparadores disponibles.</li>{% endfor %}</ul>
+  </section>
+</div>
+<section class="panel" id="confirmation"><h2>Confirmación del cliente</h2><p>Valida con el cliente que la oferta coincide con lo acordado.</p>
+  {% if confirmation %}
+    <p>Estado: <strong>{{ {'pendiente': 'Pendiente', 'confirmada': 'Confirmada', 'corregida': 'Corrección solicitada', 'desconocida': 'Servicio no reconocido', 'silencio': 'Sin respuesta'}.get(confirmation.status, confirmation.status) }}</strong> · Vence: {{ confirmation.expires_at|date_es }}</p>
+    {% if confirmation.note %}<p>Nota del cliente: {{ confirmation.note }}</p>{% endif %}
+    <label for="confirmation-link">Enlace para el cliente</label><div class="copy-row"><input id="confirmation-link" value="{{ confirmation_url }}" readonly><button class="button secondary" type="button" data-copy="confirmation-link">Copiar enlace</button></div>
+    <a href="{{ confirmation_url }}">Abrir confirmación</a><p id="copy-status" class="hint" role="status"></p>
+  {% else %}<p class="hint">Todavía no hay un enlace de confirmación para esta venta.</p>{% endif %}
+  <div class="form-actions"><form method="post" action="/confirm/create/{{ sale.id }}"><button class="button" type="submit">{{ 'Generar nuevo enlace' if confirmation else 'Crear enlace de confirmación' }}</button></form><form method="post" action="/confirm/expire/{{ sale.id }}"><button class="button secondary" type="submit">Simular vencimiento de ventana (demo)</button></form></div>
+</section>
+{% if verdict.alert %}<section class="panel"><h2>Aviso de seguimiento</h2><p><strong>{{ verdict.alert.recipient }}</strong> · Urgencia {{ verdict.alert.urgency }}</p><p>{{ verdict.alert.action }}</p><p>Plazo: {{ verdict.alert.deadline|date_es }}</p><a href="/bandeja">Ver bandeja de avisos →</a></section>{% endif %}
+<section class="panel"><h2>Historial de la venta</h2><ol class="timeline">{% for event in events %}<li><strong>{{ event_labels.get(event.kind, event.kind) }}</strong><time datetime="{{ event.at }}">{{ event.at|date_es }}</time><p>{{ event.detail }}</p></li>{% endfor %}</ol>
+  {% if sale.edits %}<details><summary>Cambios de campos ({{ sale.edits|length }})</summary>{% for edit in sale.edits %}<p><strong>{{ field_labels.get(edit.field, edit.field) }}</strong>: {{ edit.old if edit.old is not none else 'Sin dato' }} → {{ edit.new if edit.new is not none else 'Sin dato' }} <small>{{ edit.at|date_es }}</small></p>{% endfor %}</details>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#163d38">
+  <title>{% block title %}Prometido{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='app.css') }}">
+  <script src="{{ url_for('static', path='app.js') }}" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <span class="watermark">SIMULADO</span>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Prometido, inicio"><span class="brand-mark" aria-hidden="true">P</span><span>Prometido<small>Que lo prometido sea lo entregado</small></span></a>
+    <nav aria-label="Navegación principal">
+      <a href="/" {% if request.url.path == '/' %}aria-current="page"{% endif %}>Nueva venta</a>
+      <a href="/lote" {% if request.url.path == '/lote' %}aria-current="page"{% endif %}>Lote</a>
+      <a href="/bandeja" {% if request.url.path == '/bandeja' %}aria-current="page"{% endif %}>Bandeja</a>
+    </nav>
+  </header>
+  <main id="contenido" tabindex="-1">{% block content %}{% endblock %}</main>
+  <footer class="site-footer">
+    <strong>Las buenas ventas merecen avanzar.</strong>
+    <p>Protegemos las ventas buenas de quedar atrapadas en revisión, al cliente de una promesa que no se sostiene y al vendedor honesto de cargar con el costo del que no lo es.</p>
+    <small>Demostración con datos sintéticos. Los supuestos y las fuentes se muestran en cada evaluación.</small>
+  </footer>
+</body>
+</html>
