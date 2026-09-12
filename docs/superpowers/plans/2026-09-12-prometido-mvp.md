@@ -485,3 +485,139 @@ Dónde aplica la IA (todas con salida verificable y degradación determinista):
   del lote visible; veredicto con "Por qué, en palabras"; `/salud` con el modelo. Y sin clave
   (`OPENCODE_API_KEY=` vacío y auth.json inaccesible por env `LLM_DISABLE=1`) todo sigue funcionando
   y lo dice en pantalla.
+
+---
+
+## Adendum 2 (2026-09-12, noche) — cumplir los entregables no-código del equipo
+
+Fuente: los documentos del compañero, ya copiados al repo: `docs/RETO-03-FUENTE.md`,
+`docs/EVIDENCIA-PUBLICA.md`, `docs/MODELO-DE-COSTO.md`, `docs/CASOS-ADVERSARIOS.md` y
+`CONTRATO-DE-DATOS.md` (raíz; la versión anterior del prototipo quedó en
+`docs/CONTRATO-DE-DATOS-prototipo-v1.md`). Esos documentos son el insumo del prototipo: **el
+prototipo se adapta a ellos, no al revés.** Nombres de campo, estados de `confirmacion_titular`,
+parámetros `P-NN`, vocabulario `pasa · revisar · abstención` y los 24 casos se cumplen tal cual.
+
+### T10 · Cumplimiento del banco adversario, el contrato y el modelo de costo — carril `codex-worker` (gpt-6-astra, xhigh)
+Por qué: toca motor, config, ingesta, datos y tests con criterios de aceptación exactos (24 veredictos).
+
+**Contrato `contracts/types.py` sigue congelado.** Todo campo nuevo del Anexo 1 viaja en `Sale.extra`
+con clave canónica (la del contrato) y el motor lo lee desde ahí (`engine/facts.py`).
+
+1. **Ingesta (`engine/ingest.py`)** — sinónimos para los 30 campos del `CONTRATO-DE-DATOS.md` §4:
+   `promesa_declarada→promise_text`, `velocidad_contratada→extra.velocidad_contratada` (si falta `plan`,
+   derivar el id de plan por velocidad en cualquier superficie del catálogo; si ninguna la tiene, `plan`
+   = "<N> Mbps" para que dispare R04), `precio_mensual→price`, `cliente_documento→customer_doc`,
+   `telefono_1→phone`, `telefono_2→extra`, `correo_electronico→email`, `direccion→address`,
+   `nombre_asesor→seller_id`, `equipo→extra.equipo`, `canal→channel`, `fecha_hora_registro→registered_at`,
+   `ediciones_registro→edits`, `plazo_estimado_instalacion→extra`, `confirmacion_titular(+_ts)→extra`,
+   y a `extra` con clave canónica: `plazo_vigencia`, `forma_entrega_recibo`, `forma_pago`,
+   `forma_pago_instalacion`, `cargo_instalacion_costo`, `cargo_instalacion_cuotas`, `tenencia`, `etapa`,
+   `nombre_condominio`, `torre`, `departamento`, `score_crediticio`, `catalogo_referencia_id`,
+   `acta_instalacion_ts`. Etiquetas: además de buena/mala aceptar `pasa→buena`, `revisar→mala`,
+   `abstención|abstencion→label None + extra.veredicto_esperado="abstención"`; cualquier columna
+   `veredicto_esperado` se conserva en `extra`.
+2. **Estados de consentimiento** (`CONTRATO-DE-DATOS.md` §6) → `facts.confirmation_status`: si hay
+   `Context.confirmation` manda ella; si no, `extra.confirmacion_titular`: `confirmada→confirmada`,
+   `negada→desconocida`, `enviada→pendiente`, `no_respondida→silencio`,
+   `confirmada_con_correccion→corregida`, `no_enviada→None`. `facts.confirmation_ts` desde
+   `extra.confirmacion_titular_ts` o `Confirmation.responded_at`. La UI muestra ambos vocabularios
+   ("Confirmada · `confirmada`", "Sin respuesta · `no_respondida`", …). El flujo `/c/{token}` sigue igual.
+3. **Catálogo (`config/catalog.yaml`)** según `docs/EVIDENCIA-PUBLICA.md` §1, §2 y §4:
+   - `surfaces`: `cartilla` (documento legal, `origen: PUBLICO`, fuente
+     `https://win.pe/files/cartilla-informativa.pdf?ver=1.2`, `governs_contract: true`), `web_hogar`
+     (`https://win.pe/hogar`, promo 1 mes), `web_chiclayo` (`https://win.pe/chiclayo`, promo 3 meses),
+     ambos `origen: PUBLICO`, fecha 2026-09-12, nota "verificar en vivo antes de presentar".
+   - Planes canónicos = cartilla: `fibra_100` 79.00 (`zones: [provincias]`), `fibra_200` 99.00,
+     `fibra_300` 119.00, `fibra_400` 129.00, `fibra_600` 169.00, `fibra_1000` 259.00, todos
+     `surfaces: [cartilla]` (1000 también en las web). Escalones solo web: `fibra_350`, `fibra_550`,
+     `fibra_750` (web_chiclayo), `fibra_500`, `fibra_850` (web_hogar), con `surfaces` y los precios
+     observados el 2026-09-12 cuando se conocen (500: 99.00; 750: 54.50; 850: 59.50; 1000 web: 69.50,
+     etiquetados "tarifa introductoria, verificar") o `price: null`.
+   - `promo_prices`: `fibra_100: 39.50` (`origen: SUPUESTO_DEMO`, ejemplo de EVIDENCIA-PUBLICA §3.1).
+   - `installation: {cost: 120.00, quotas: 6, quota: 20.00, id: P-02, origen: PUBLICO}`,
+     `paper_invoice_fee: {amount: 10.00, id: P-03}`, `forced_term_months: {value: 6, id: P-04}`,
+     `min_credit_score: {value: 201, origen: PUBLICO, fuente: "cartilla §2.3"}`, `mesh: {included: false,
+     note: "a solicitud", origen: PUBLICO}`.
+   - `coverage`: mantener distritos SUPUESTO_DEMO para la demo y agregar `regions`: `lima` (Lima
+     Metropolitana, Callao, Barranca, Huaral, Hualmay, Huacho) y `provincias` (Santa, Trujillo, Chiclayo,
+     Lambayeque, Piura). `facts.address_region` se deriva del texto de `address`/`district` ("lima" si
+     contiene "lima" y no "lambayeque"; "provincias" si contiene una ciudad de provincias; si no, None).
+4. **Costos (`config/costs.yaml`)** con el registro `P-NN` de `docs/MODELO-DE-COSTO.md` §3, cada
+   parámetro con `id`, `origen` y `fuente`: costos unitarios `instalacion_fallida: 80.00 (P-09)`,
+   `baja_temprana: 95.00 (P-11)`, `reclamo: 45.00 (P-13)`, `reversion_facturacion: 58.00 (P-15)`;
+   probabilidades base de una venta señalada `P-08 0.05, P-10 0.06, P-12 0.10, P-14 0.15`
+   (documentadas; cada regla declara su impacto propio, nunca menor que la base para severidad ≥ media);
+   `review: {minutes: 12 (P-16), cost_per_minute: 2.50 (P-17), cost: 30.00}`; `recoverability: 1.0`
+   (§6: una revisión a tiempo evita el desenlace); `thresholds.retain_multiple: 4` (RETENER = 4 × revisar
+   o evidencia bloqueante; es un refinamiento del prototipo dentro de la familia `revisar`); priors
+   `SUPUESTO_DEMO` por canal más `priors_by_seller` (`ASESOR-014: 0.10`) y `priors_by_team`
+   (`EQUIPO-CHICLAYO-02: 0.08`); `prior = max(canal, asesor, equipo)`; el prior solo nunca supera el
+   costo de revisar. La UI dice "Costo de revisar = P-16 × P-17 = S/ 30,00" y "Costo esperado ≥ costo de
+   revisar → revisar".
+5. **Ventanas (`config/settings.yaml`)**: `install_ceiling_days: 30 (P-01)`, `install_median_days: 10
+   (P-07)`, `verification_window_days: 10` (= P-07), `confirmation_window_hours: 240` (derivada),
+   `alert_buffer_hours: 24`; quitar `install_window_hours` y usar `install_ceiling_days` en R11 y avisos.
+6. **Reglas nuevas (`config/rules.yaml`)**, todas con `source`/`fuente` citando el documento y sección:
+   - `R30_permanencia_prometida` (promesa-registro, alta, PUBLICO cartilla §2.5): claims contiene "sin
+     permanencia" (léxico: sin permanencia, sin contrato, se puede ir cuando quiera, sin plazo forzoso) y
+     `plazo_vigencia` empieza con "forzoso".
+   - `R31_recibo_fisico_no_declarado` (promesa-registro, media, PUBLICO Anexo 1): `forma_entrega_recibo`
+     = físico, `promise_price` no nulo y la promesa no menciona "recibo" (`facts.promise_mentions_recibo`).
+     BUE-02 no dispara; DEF-04 sí.
+   - `R32_score_bajo_minimo` (catalogo-registro, alta, PUBLICO cartilla §2.3): `score_crediticio < 201`.
+   - `R33_titular_no_verificable` (identidad, `abstain: true`, PUBLICO Anexo 1): `tenencia` = inquilino,
+     confirmación `confirmada`, `phone` presente y `consent_evidence` vacío → ABSTENERSE con motivo "la
+     confirmación llegó al teléfono registrado y no hay evidencia de que ese número sea del firmante".
+     BUE-03 (sin teléfono) no dispara; AMB-04 sí.
+   - `R34_condominio_sin_unidad` (registro-entrega, media, PUBLICO Anexo 1): `nombre_condominio` presente y
+     falta `torre` o `departamento`.
+   - `R35_primera_factura_no_declarada` (registro-entrega, media, PUBLICO cartilla §2.2/§2.6):
+     `cargo_instalacion_cuotas` o `cargo_instalacion_costo` presentes, `promise_price` no nulo y la
+     promesa no menciona cuota/instalación (`facts.promise_mentions_installation_fee`). Mensaje con la
+     composición de la primera factura (prorrateo + renta + cuota S/ 20 + S/ 10 si recibo físico).
+     BUE-01 no dispara; LIM-01 sí.
+   - `R36_plan_fuera_de_zona` (registro-entrega, alta, PUBLICO cartilla §2.1): el plan tiene `zones:
+     [provincias]` y `address_region == "lima"`. BUE-04 no; LIM-05 sí.
+   - `R37_catalogo_ambiguo` (promesa-catalogo, `abstain: true`, CONTRADICCIÓN EVIDENCIA §1/§8): la
+     velocidad registrada o prometida existe solo en superficies web y `catalogo_referencia_id` es nulo.
+     AMB-03 sí. Nuestros 25 casos de demo migran a escalones de la cartilla para no abstenerse.
+   - `R38_promo_duracion_no_verificable` (promesa-catalogo, `abstain: true`, CONTRADICCIÓN): la promesa
+     menciona duración promocional (regex `promocional|por \d+ meses|despu[eé]s sube|luego sube`) y
+     `catalogo_referencia_id` es nulo. AMB-05 sí.
+   - `R39_confirmacion_tardia` (identidad, media, SUPUESTO P-07): confirmación `confirmada` con
+     `confirmation_ts` posterior a `registered_at + verification_window_days`. LIM-04 sí (ver dato 8).
+   - Ajustes: colisión de teléfono/correo/documento = mismo contacto y **algún** atributo de identidad
+     conocido en ambos y distinto (`customer_name`, `customer_doc` o `address`), ya no exige nombres;
+     R17 dirección repetida agrega `and not (torre and departamento)`; `decide()`: evidencia con
+     `abstain: true` → ABSTENERSE con `abstain_reason` = mensaje, salvo que haya bloqueante.
+   - Léxico: sumar "routers mesh incluidos", "mesh incluido", "equipos incluidos sin costo" (inexistente,
+     PUBLICO EVIDENCIA §1 "a solicitud"), "sin permanencia" y alias, "todo incluido" (insostenible si hay
+     recargos no declarados; que R31/R35 lo usen como refuerzo, no como regla propia).
+7. **Vocabulario en la UI**: cada decisión muestra su equivalente del modelo de costo: `APROBAR · pasa`,
+   `REVISAR · revisar`, `RETENER · revisar (prioridad máxima)`, `ABSTENERSE · abstención`. Matriz de
+   confusión: positivo = familia revisar; fila adicional "abstenciones esperadas acertadas" cuando
+   `extra.veredicto_esperado` = abstención.
+8. **Datos**: `data/casos-adversarios.json` con los 24 casos **exactamente** con las claves y valores de
+   `docs/CASOS-ADVERSARIOS.md` (`id`: BUE-01…LIM-05, más `veredicto_esperado`, `familia`, `comparador`
+   y `extra.simulado: true`). Única adición documentada: LIM-04 necesita un ancla temporal que el banco
+   omite; agregar `fecha_hora_registro: "2026-08-30T10:00:00-05:00"` y anotarlo en `nota_demo`. Los 25
+   casos de `data/cases.json` migran a los escalones de la cartilla (200/300/400/600/1000, precios de la
+   cartilla) conservando la intención de cada uno. Botón "Cargar los 24 casos adversarios" en `/lote`.
+9. **Tests**: `tests/test_adversarial.py` recorre los 24 casos por `engine.ingest.parse` + `evaluate`
+   con historial = el lote completo y exige: `pasa → APROBAR`, `revisar → REVISAR o RETENER`,
+   `abstención → ABSTENERSE`, y que la regla principal coincida con el comparador del caso (tabla en el
+   test). `tests/test_app.py` sigue exigiendo 13/13 y 0 falsos positivos en los 25 de demo. Ajustar
+   impactos de reglas (no umbrales ni costos P-NN) hasta que ambos bancos pasen.
+10. **Verificación con computer-use** (viewport móvil): `/lote` → "Cargar los 24 casos adversarios" →
+    matriz y lista con los veredictos esperados vs obtenidos; abrir DEF-04, LIM-01, AMB-03 y LIM-05 y
+    confirmar la regla, la fuente `PUBLICO` con sección y el vocabulario `pasa/revisar/abstención`;
+    pegar el JSON de BUE-02 y DEF-04 juntos y ver que solo DEF-04 dispara R31.
+
+### T10b · Integrar los documentos del equipo en README, GUION y CONTEXTO — carril `opencode-worker` (deepseek-v4-pro)
+Depende de T10. README: pregunta y respuesta se mantienen; "Cómo probarlo en 60 s" usa los nombres del
+Anexo 1 (`promesa_declarada`, `velocidad_contratada`, `precio_mensual`, `forma_entrega_recibo`,
+`confirmacion_titular`); nueva sección "Los tres catálogos de WIN" (EVIDENCIA §1, como hallazgo de
+arquitectura de información); tabla de documentos con los cinco entregables del equipo; vocabulario
+`pasa/revisar/abstención`; costo de revisar `P-16 × P-17`. `CONTRATO-DE-DATOS.md`: apéndice
+"Correspondencia con el prototipo" (campo del contrato → campo `Sale` o clave `extra`, y qué regla lo
+usa). GUION: bloque del banco adversario. CONTEXTO: estado real.
