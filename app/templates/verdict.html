@@ -36,8 +36,7 @@
   {% else %}<p class="hint">Todavía no hay un enlace de confirmación para esta venta.</p>{% endif %}
   <div class="form-actions"><form method="post" action="/confirm/create/{{ sale.id }}"><button class="button" type="submit">{{ 'Generar nuevo enlace' if confirmation else 'Crear enlace de confirmación' }}</button></form><form method="post" action="/confirm/expire/{{ sale.id }}"><button class="button secondary" type="submit">Simular vencimiento de ventana (demo)</button></form></div>
 </section>
-{% if verdict.alert %}<section class="panel"><h2>Aviso de seguimiento</h2><p><strong>{{ verdict.alert.recipient }}</strong> · Urgencia {{ verdict.alert.urgency }}</p><p>{{ verdict.alert.action }}</p><p>Plazo: {{ verdict.alert.deadline|date_es }}</p><a href="/bandeja">Ver bandeja de avisos →</a></section>{% endif %}
-{% if verdict.alert %}<section class="panel"><h2>Aviso de seguimiento</h2><p><strong>{{ verdict.alert.recipient }}</strong> · Urgencia {{ verdict.alert.urgency }}</p><p>{{ verdict.alert.action }}</p><p>Plazo: {{ verdict.alert.deadline|date_es }}</p><a href="/bandeja">Ver bandeja de avisos →</a></section>{% endif %}
+{% if verdict.alert %}<section class="panel"><h2>Aviso de seguimiento</h2><p><strong>{{ verdict.alert.recipient }}</strong> · Urgencia {{ verdict.alert.urgency }}</p><p>{{ verdict.alert.action|plain }}</p><p>Plazo: {{ verdict.alert.deadline|date_es }}</p><a href="/bandeja">Ver bandeja de avisos →</a></section>{% endif %}
 <details class="panel"><summary>Detalle técnico (para el equipo)</summary>
   <p class="hint">Costo de revisar = P-16 × P-17 = S/ {{ '%.2f'|format(verdict.review_cost)|replace('.', ',') }}. Costo esperado ≥ costo de revisar → revisar.</p>
   <p class="hint">{{ explanation.label }}{% if explanation.model %} · {{ explanation.model }}{% endif %} · {{ 'Promesa extraída con IA' if verdict.llm_mode == 'llm' else 'Promesa: comparador determinista' }}</p>
@@ -62,8 +61,8 @@
   <section class="panel" id="counterfactual">
     <p class="eyebrow">Qué tendría que cambiar</p><h2>Contrafáctico</h2>
     {% if verdict.counterfactual %}
-      <p>{{ verdict.counterfactual.text }}</p>
-      {% for change in verdict.counterfactual.changes %}<div class="change"><strong>{{ field_labels.get(change.field, change.field) }}</strong><p>{{ change['from'] if change['from'] is not none else 'Sin indicar' }} → {{ change.to if change.to is not none else 'Sin indicar' }}</p><small>{{ change.reason }}</small></div>{% endfor %}
+      <p>{{ verdict.counterfactual.text|plain }}</p>
+      {% for change in verdict.counterfactual.changes %}<div class="change"><strong>{{ field_labels.get(change.field, change.field) }}</strong><p>{{ change['from'] if change['from'] is not none else 'Sin indicar' }} → {{ change.to if change.to is not none else 'Sin indicar' }}</p><small>{{ change.reason|plain }}</small></div>{% endfor %}
       <p><span class="tag {{ verdict.counterfactual.resulting_decision|lower }}">{{ verdict.counterfactual.resulting_decision|capitalize }}</span> Costo resultante: <strong>{{ 'No estimable' if verdict.counterfactual.resulting_decision == 'ABSTENERSE' else 'S/ %.2f'|format(verdict.counterfactual.resulting_cost) }}</strong></p>
       <p class="hint">Escenario de comprobación. No modifica la venta ni autoriza cambiar las condiciones comerciales.</p>
     {% else %}<p>La venta puede avanzar. No se requieren ajustes con la información disponible.</p>{% endif %}
@@ -88,12 +87,12 @@
     {% if verdict.promise %}
     <blockquote>{{ verdict.promise.raw_text or sale.promise_text or 'Promesa estructurada' }}</blockquote>
     <dl class="facts">{% for key, value in verdict.promise.model_dump().items() if key != 'raw_text' %}
-      <div><dt>{{ field_labels.get(key, key) }}</dt><dd>{% if value is none or value == [] %}Sin dato{% elif key == 'source' %}{{ {'llm': 'LLM', 'deterministic': 'Comparador determinista', 'structured': 'Datos estructurados'}.get(value, value) }}{% elif key == 'plan' %}{{ catalog.plans.get(value, {}).get('name', value) }}{% elif key == 'promo' %}{{ catalog.promos.get(value, {}).get('name', value) }}{% elif key == 'claims' %}{{ value|join(', ') }}{% else %}{{ value|plain }}{% endif %}</dd></div>
+      <div><dt>{{ field_labels.get(key, key)|plain }}</dt><dd>{% if value is none or value == [] %}Sin dato{% elif key == 'source' %}{{ {'llm': 'LLM', 'deterministic': 'Comparador determinista', 'structured': 'Datos estructurados'}.get(value, value) }}{% elif key == 'plan' %}{{ catalog.plans.get(value, {}).get('name', value) }}{% elif key == 'promo' %}{{ catalog.promos.get(value, {}).get('name', value) }}{% elif key == 'claims' %}{{ value|join(', ') }}{% else %}{{ value|plain }}{% endif %}</dd></div>
     {% endfor %}</dl>
     {% else %}<p>No se proporcionó una promesa para comparar.</p>{% endif %}
   </section>
   <section class="panel"><h2>Campos faltantes</h2><p class="hint">Estos datos ausentes o no válidos limitan la evaluación.</p>
-    <ul>{% for field in verdict.missing_fields %}<li>{{ field_labels.get(field, field) }}</li>{% else %}<li>No faltan campos para los comparadores disponibles.</li>{% endfor %}</ul>
+    <ul>{% for field in verdict.missing_fields %}<li>{{ field_labels.get(field, field)|plain }}</li>{% else %}<li>No faltan campos para los comparadores disponibles.</li>{% endfor %}</ul>
   </section>
 </div>
 <section class="panel"><h2>Historial de la venta</h2><ol class="timeline">{% for event in events %}<li><strong>{{ event_labels.get(event.kind, event.kind) }}</strong><time datetime="{{ event.at }}">{{ event.at|date_es }}</time><p>{{ event.detail|plain }}</p></li>{% endfor %}</ol>
