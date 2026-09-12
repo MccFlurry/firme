@@ -142,8 +142,8 @@ def _deterministic(text: str, catalog: dict) -> Promise:
 
 def normalize_promises(texts: list[str], catalog) -> list[Promise]:
     fallbacks = [_deterministic(text or "", catalog) for text in texts]
-    if not any(text and text.strip() for text in texts):
-        return fallbacks
+    if not any(text and text.strip() for text in texts) or os.getenv("LLM_BATCH") == "0":
+        return fallbacks  # ponytail: LLM_BATCH=0 keeps batch instant on the public demo; per-sale AI stays on
     data = _chat(_messages(
         'Return {"promises":[{"plan":null,"speed_mbps":null,"price":null,"promo":null,'
         '"install_days":null,"claims":[]}]}, exactly one object per input text, in the same order. '
@@ -261,6 +261,8 @@ def summarize_batch(rows) -> str:
     fallback = f"Se evaluaron {len(rows)} ventas; {len(pending)} requieren revisión o retención."
     if pending:
         fallback += f" Revisar primero {pending[0]['id']} por su mayor costo recuperable por minuto."
+    if os.getenv("LLM_BATCH") == "0":
+        return fallback
     return _explain(
         "Summarize this batch in 2–3 sentences, cite sale IDs. Report shared sellers, phones or addresses "
         "only when the supplied nonempty values actually repeat, and do not imply fraud. "
