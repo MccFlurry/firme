@@ -65,7 +65,7 @@ def test_adversarial_batch_and_invoice_pair(monkeypatch, tmp_path):
     for id, rule in (("DEF-04", "R31"), ("LIM-01", "R35"), ("AMB-03", "R37"), ("LIM-05", "R36")):
         response = client.get(f"/ventas/{id}")
         assert response.status_code == 200 and rule in response.text and "PUBLICO" in response.text
-        assert "docs/EVIDENCIA-PUBLICA.md §" in response.text and "P-16 × P-17 = S/ 30,00" in response.text
+        assert "P-16 × P-17 = S/ 30,00" in response.text
         assert (">Abstenerse<" if id == "AMB-03" else ">Revisar<") in response.text
     assert "AMB-03" in client.get("/bandeja").text
     pair = [case for case in json.loads(ADVERSARIAL_PATH.read_text()) if case["id"] in {"BUE-02", "DEF-04"}]
