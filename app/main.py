@@ -3,6 +3,7 @@
 import json
 import math
 import os
+import secrets
 from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -319,7 +320,28 @@ async def batch_submit(request: Request, payload: str = Form(""), file: UploadFi
     if not content:
         return render_batch(request, error="Pega un lote JSON/CSV o sube un archivo para procesar.", status_code=400)
     sales, report = parse(content, filename)
-    verdicts = [await run_in_threadpool(evaluate_and_store, sale) for sale in sales]
+    state = store.load()
+    # Rows without an id get one now, so every row can see the others in its history.
+    taken = set(state["sales"]) | {sale.id for sale in sales if sale.id}
+    for sale in sales:
+        while not sale.id:
+            candidate = f"V-{secrets.token_hex(2).upper()}"
+            if candidate not in taken:
+                sale.id = candidate
+                taken.add(candidate)
+    batch_ids = {sale.id for sale in sales}
+    existing_history = [
+        Sale.model_validate(item) for key, item in state["sales"].items() if key not in batch_ids
+    ]
+    # ponytail: O(n²) histories fit the unpaginated demo; index them if batch size grows.
+    verdicts = [
+        await run_in_threadpool(
+            evaluate_and_store,
+            sale,
+            existing_history + [other for other in sales if other is not sale],
+        )
+        for sale in sales
+    ]
     state = store.load()
     rows = [{"verdict": verdict, "sale": Sale.model_validate(state["sales"][verdict.sale_id]),
              "main_rule": main_evidence(verdict)} for verdict in verdicts]

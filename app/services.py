@@ -11,7 +11,7 @@ from engine.llm import normalize_promise
 from engine.rules import load_config
 
 
-def evaluate_and_store(sale: Sale) -> Verdict:
+def evaluate_and_store(sale: Sale, history: list[Sale] | None = None) -> Verdict:
     """Return the saved verdict; an empty sale ID allocates a new V-XXXX ID.
 
     Keep an unchanged normalized promise when T4 reevaluates a confirmation.
@@ -48,7 +48,9 @@ def evaluate_and_store(sale: Sale) -> Verdict:
                     ))
         confirmation = data["confirmations"].get(sale.id)
         verdict = evaluate(sale, Context(
-            history=[Sale.model_validate(item) for key, item in data["sales"].items() if key != sale.id],
+            history=history if history is not None else [
+                Sale.model_validate(item) for key, item in data["sales"].items() if key != sale.id
+            ],
             confirmation=Confirmation.model_validate(confirmation) if confirmation else None,
             now=now,
         ))
