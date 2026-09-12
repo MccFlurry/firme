@@ -252,16 +252,16 @@ SEVERITY_ORDER = ("baja", "media", "alta", "bloqueante")
 
 def batch_example():
     return [
-        {"customer": "Ana Quispe", "phone_number": "912345678", "monthly_price": 79.90,
-         "plan_name": "Fibra 200", "label": "buena"},
-        {"customer": "Luis Paredes", "phone_number": "923456789", "monthly_price": 50.00,
-         "plan_name": "Fibra 400", "label": "mala"},
-        {"customer": "Rosa Díaz", "phone_number": "934567890", "monthly_price": 119.90,
-         "plan_name": "Fibra 600", "label": "buena"},
-        {"customer": "Jorge Salas", "phone_number": "945678901", "monthly_price": 99.90,
+        {"customer": "Ana Quispe", "phone_number": "912345678", "monthly_price": 99.00,
+         "plan_name": "Fibra 500", "label": "buena"},
+        {"customer": "Luis Paredes", "phone_number": "923456789", "monthly_price": 40.00,
+         "plan_name": "Fibra 750", "label": "mala"},
+        {"customer": "Rosa Díaz", "phone_number": "934567890", "monthly_price": 59.50,
+         "plan_name": "Fibra 850", "label": "buena"},
+        {"customer": "Jorge Salas", "phone_number": "945678901", "monthly_price": 50.00,
          "plan_name": "Fibra 1000", "label": "mala"},
-        {"customer": "Mía Castro", "phone_number": "956789012", "monthly_price": 79.90,
-         "plan_name": "Fibra 200", "label": "buena"},
+        {"customer": "Mía Castro", "phone_number": "956789012", "monthly_price": 99.00,
+         "plan_name": "Fibra 500", "label": "buena"},
     ]
 
 

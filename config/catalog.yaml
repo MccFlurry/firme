@@ -1,50 +1,50 @@
 origen: SUPUESTO_DEMO
-fuente: "Plan Firme T1: catálogo sintético; no representa tarifas ni cobertura vigentes de WIN."
+fuente: "Planes: tarifas públicas de https://win.pe/ (consultado 2026-09-12). Promos y cobertura: supuestos de demo."
 plans:
-  fibra_200:
-    name: Fibra 200 Mbps
-    speed_mbps: 200
-    price: 79.90
+  fibra_500:
+    name: Fibra 500 Mbps
+    speed_mbps: 500
+    price: 99.00
     tech: fibra
-    aliases: [fibra 200, 200 megas, plan 200]
-    origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, catálogo de demostración."
-  fibra_400:
-    name: Fibra 400 Mbps
-    speed_mbps: 400
-    price: 99.90
+    aliases: [fibra 500, 500 megas, plan 500]
+    origen: PUBLICO
+    fuente: "https://win.pe/ (consultado 2026-09-12)"
+  fibra_750:
+    name: Fibra 750 Mbps (tarifa introductoria)
+    speed_mbps: 750
+    price: 54.50
     tech: fibra
-    aliases: [fibra 400, 400 megas, plan 400]
-    origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, catálogo de demostración."
-  fibra_600:
-    name: Fibra 600 Mbps
-    speed_mbps: 600
-    price: 119.90
+    aliases: [fibra 750, 750 megas, plan 750]
+    origen: PUBLICO
+    fuente: "https://win.pe/ (consultado 2026-09-12)"
+  fibra_850:
+    name: Fibra 850 Mbps (tarifa introductoria)
+    speed_mbps: 850
+    price: 59.50
     tech: fibra
-    aliases: [fibra 600, 600 megas, plan 600]
-    origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, catálogo de demostración."
+    aliases: [fibra 850, 850 megas, plan 850]
+    origen: PUBLICO
+    fuente: "https://win.pe/ (consultado 2026-09-12)"
   fibra_1000:
-    name: Fibra 1000 Mbps
+    name: Fibra 1000 Mbps (tarifa introductoria)
     speed_mbps: 1000
-    price: 149.90
+    price: 69.50
     tech: fibra
     aliases: [fibra 1000, 1000 megas, plan 1000, un giga]
-    origen: SUPUESTO_DEMO
-    fuente: "Plan Firme T1, catálogo de demostración."
+    origen: PUBLICO
+    fuente: "https://win.pe/ (consultado 2026-09-12)"
 promos:
   primer_mes_gratis:
     name: Primer mes gratis
     aliases: [primer mes gratis, un mes gratis]
-    applies_to: [fibra_400, fibra_600, fibra_1000]
+    applies_to: [fibra_750, fibra_850, fibra_1000]
     months: 1
     origen: SUPUESTO_DEMO
     fuente: "Plan Firme T1, promociones de demostración."
   descuento_3m:
     name: S/ 20 de descuento por 3 meses
     aliases: [descuento de 20 soles por 3 meses, descuento por 3 meses, descuento 3m]
-    applies_to: [fibra_200, fibra_400]
+    applies_to: [fibra_500, fibra_750]
     discount: 20
     months: 3
     origen: SUPUESTO_DEMO
@@ -57,12 +57,12 @@ coverage:
     fuente: "Plan Firme T1, cobertura sintética."
   la_victoria:
     tech: [fibra]
-    max_speed_mbps: 600
+    max_speed_mbps: 850
     origen: SUPUESTO_DEMO
     fuente: "Plan Firme T1, cobertura sintética."
   jose_leonardo_ortiz:
     tech: [fibra]
-    max_speed_mbps: 400
+    max_speed_mbps: 500
     origen: SUPUESTO_DEMO
     fuente: "Plan Firme T1, cobertura sintética."
   pimentel:

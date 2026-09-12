@@ -19,8 +19,8 @@ def sale(**changes):
     values = dict(
         id="V-TEST", seller_id="S-DEMO", channel="web", customer_name="Cliente Demo",
         customer_doc="00000001", phone="900000001", email="demo@example.invalid",
-        address="Av. Perú 123", district="chiclayo_centro", plan="fibra_200",
-        price=79.90, registered_at="2026-09-12T10:00:00-05:00",
+        address="Av. Perú 123", district="chiclayo_centro", plan="fibra_500",
+        price=99.0, registered_at="2026-09-12T10:00:00-05:00",
         install_date="2026-09-13T10:00:00-05:00", fill_seconds=120,
         consent_evidence="firma",
     )
@@ -54,14 +54,14 @@ def test_low_price_evidence_and_counterfactual():
     assert verdict.decision == "REVISAR"
     evidence = next(e for e in verdict.evidence if e.rule_id == "R03_precio_bajo_tarifa")
     assert evidence.values["price"] == 50
-    assert evidence.values["catalog_price"] == 79.90
+    assert evidence.values["catalog_price"] == 99.0
     assert evidence.origin == "SUPUESTO_DEMO"
     assert evidence.condition and evidence.source
     assert verdict.counterfactual.resulting_decision == "APROBAR"
     assert verdict.counterfactual.changes == [
-        {"field": "price", "from": 50.0, "to": 79.90, "reason": "igualar al tarifario vigente"}
+        {"field": "price", "from": 50.0, "to": 99.0, "reason": "igualar al tarifario vigente"}
     ]
-    assert evaluate(original.model_copy(update={"price": 79.90}), context()).decision == "APROBAR"
+    assert evaluate(original.model_copy(update={"price": 99.0}), context()).decision == "APROBAR"
     assert original.price == 50
     assert verdict.alert.recipient == "Calidad de venta"
     assert datetime.fromisoformat(verdict.alert.deadline) == datetime.fromisoformat("2026-09-12T22:00:00-05:00")
@@ -69,7 +69,7 @@ def test_low_price_evidence_and_counterfactual():
 
 
 def test_unsupported_promise_claim():
-    verdict = evaluate(sale(promise_text="Fibra 200 a S/ 79.90, gratis para siempre"), context())
+    verdict = evaluate(sale(promise_text="Fibra 500 a S/ 99.00, gratis para siempre"), context())
     evidence = next(e for e in verdict.evidence if e.rule_id == "R23_promesa_insostenible")
     assert evidence.strength == "linguistica"
     assert evidence.values["unsupported_claims"] == ["gratis para siempre"]
@@ -92,7 +92,7 @@ def test_confirmation_signals(status, rule):
 
 
 def test_confirmed_clears_identity_and_promise_record_only():
-    original = sale(consent_evidence=None, promise=Promise(price=79.90), price=50)
+    original = sale(consent_evidence=None, promise=Promise(price=99.0), price=50)
     pending = evaluate(original, context())
     confirmed = evaluate(original, context("confirmada"))
     assert any(e.edge == "identidad" for e in pending.evidence)
@@ -136,12 +136,12 @@ def test_abstention(changes, missing):
 
 def test_deterministic_normalization():
     promise, mode = normalize_promise(
-        "Plan 400, 400 megas a S/ 99,90, primer mes gratis, sin contrato; instalación en 2 días",
+        "Plan 500, 500 megas a S/ 99,00, primer mes gratis, sin contrato; instalación en 2 días",
         load_config("catalog"),
     )
     assert mode == "determinista"
     assert promise.source == "deterministic"
-    assert (promise.plan, promise.speed_mbps, promise.price) == ("fibra_400", 400, 99.90)
+    assert (promise.plan, promise.speed_mbps, promise.price) == ("fibra_500", 500, 99.0)
     assert promise.promo == "primer_mes_gratis"
     assert promise.install_days == 2
     assert promise.claims == ["sin contrato"]
@@ -163,7 +163,7 @@ def test_all_missing_or_invalid_dates_degrade_without_crashing():
     ({"promo": "primer_mes_gratis"}, "R05_promo_no_aplicable"),
     ({"district": "pimentel"}, "R10_sin_cobertura"),
     ({"install_date": "2026-09-15T10:00:00-05:00"}, "R11_instalacion_fuera_ventana"),
-    ({"extra": {"billing_amount": 100}}, "R12_facturacion_distinta"),
+    ({"extra": {"billing_amount": 200}}, "R12_facturacion_distinta"),
     ({"fill_seconds": 20}, "R19_llenado_rapido"),
     ({"registered_at": "2026-09-12T02:40:00-05:00"}, "R20_hora_atipica"),
     ({"channel": "campo"}, "R27_prior_canal"),
@@ -201,10 +201,10 @@ def test_llm_success_and_timeout_fallback(monkeypatch):
 
         def parse(self, **kwargs):
             calls.append(kwargs)
-            return SimpleNamespace(parsed_output=kwargs["output_format"](plan="fibra_200", price=79.90))
+            return SimpleNamespace(parsed_output=kwargs["output_format"](plan="fibra_500", price=99.0))
 
     monkeypatch.setattr(llm.anthropic, "Anthropic", Client)
-    promise, mode = normalize_promise("200 megas S/ 79.90", load_config("catalog"))
+    promise, mode = normalize_promise("500 megas S/ 99.00", load_config("catalog"))
     assert mode == "llm" and promise.source == "llm"
     assert calls[0]["model"] == "claude-opus-5"
     assert calls[0]["output_config"] == {"effort": "low"}
@@ -214,10 +214,10 @@ def test_llm_success_and_timeout_fallback(monkeypatch):
         raise TimeoutError("offline")
 
     monkeypatch.setattr(Client, "parse", fail)
-    promise, mode = normalize_promise("200 megas S/ 79.90", load_config("catalog"))
-    assert mode == "determinista" and promise.price == 79.90
+    promise, mode = normalize_promise("500 megas S/ 99.00", load_config("catalog"))
+    assert mode == "determinista" and promise.price == 99.0
     text, mode = explain_for_client(sale(), promise)
-    assert mode == "determinista" and "79.90" in text and "Cliente Demo" in text
+    assert mode == "determinista" and "99.00" in text and "Cliente Demo" in text
 
 
 def test_noisy_or_and_prior_counted_once():
@@ -278,7 +278,7 @@ def test_alert_without_install_date_and_unrelated_confirmation():
 
 
 def test_catalog_aliases_and_applicable_promo():
-    verdict = evaluate(sale(plan="200 megas", promo="descuento 3m", price=59.90), context())
+    verdict = evaluate(sale(plan="500 megas", promo="descuento 3m", price=79.0), context())
     assert verdict.decision == "APROBAR"
     assert "R03_precio_bajo_tarifa" not in ids(verdict)
     assert "R05_promo_no_aplicable" not in ids(verdict)
@@ -286,12 +286,12 @@ def test_catalog_aliases_and_applicable_promo():
 
 @pytest.mark.parametrize("promise,rule", [
     (Promise(plan="plan_imposible"), "R01_plan_prometido_inexistente"),
-    (Promise(plan="fibra_200", price=30), "R02_precio_prometido_distinto"),
-    (Promise(plan="fibra_400"), "R06_plan_promesa_registro"),
+    (Promise(plan="fibra_500", price=30), "R02_precio_prometido_distinto"),
+    (Promise(plan="fibra_750"), "R06_plan_promesa_registro"),
     (Promise(promo="descuento_3m"), "R08_promo_promesa_registro"),
     (Promise(install_days=2), "R09_fecha_promesa_registro"),
     (Promise(speed_mbps=9000), "R28_velocidad_prometida"),
-    (Promise(plan="fibra_200", promo="primer_mes_gratis"), "R29_promo_prometida_no_aplicable"),
+    (Promise(plan="fibra_500", promo="primer_mes_gratis"), "R29_promo_prometida_no_aplicable"),
 ])
 def test_promise_comparators(promise, rule):
     assert rule in ids(evaluate(sale(promise=promise), context()))
@@ -336,8 +336,8 @@ def test_llm_empty_result_and_api_error_degrade(monkeypatch):
             return SimpleNamespace(content=[SimpleNamespace(type="text", text="Texto de prueba")])
 
     monkeypatch.setattr(llm.anthropic, "Anthropic", Client)
-    promise, mode = normalize_promise("Plan 200 S/ 79.90", load_config("catalog"))
-    assert mode == "determinista" and promise.plan == "fibra_200"
+    promise, mode = normalize_promise("Plan 500 S/ 99.00", load_config("catalog"))
+    assert mode == "determinista" and promise.plan == "fibra_500"
     assert explain_for_client(sale(), promise) == ("Texto de prueba", "llm")
 
     def fail(self, **kwargs):

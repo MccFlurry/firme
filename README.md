@@ -59,13 +59,13 @@ Sin credenciales y sin instalar nada: ábrela en tu propio teléfono.
 
    ```json
    [
-     {"customer": "Ana Quispe",  "phone_number": "912345678", "monthly_price": 79.90, "plan_name": "Fibra 200", "label": "buena"},
-     {"customer": "Luis Paredes","phone_number": "923456789", "monthly_price": 50.00, "plan_name": "Fibra 400", "label": "mala"}
+     {"customer": "Ana Quispe",  "phone_number": "912345678", "monthly_price": 99.00, "plan_name": "Fibra 500", "label": "buena"},
+     {"customer": "Luis Paredes","phone_number": "923456789", "monthly_price": 40.00, "plan_name": "Fibra 750", "label": "mala"}
    ]
    ```
 
 3. Envía el lote. Verás dos veredictos: la primera venta **APROBAR** y la segunda
-   **REVISAR** (precio S/ 50 por debajo del tarifario de Fibra 400), cada una con
+   **REVISAR** (precio S/ 40 por debajo del tarifario de Fibra 750), cada una con
    su cadena de evidencia, costo esperado y contrafáctico; abajo, la matriz de
    confusión contra las etiquetas.
 
