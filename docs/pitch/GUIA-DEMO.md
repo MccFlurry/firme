@@ -44,8 +44,8 @@ Láminas: `WIN-Reto03-Pitch-3min.pptx` · Guion hablado: `GUION-PITCH-3MIN.md`.
 
    ```json
    [
-     {"customer": "Ana Quispe",  "phone_number": "912345678", "monthly_price": 99.00, "plan_name": "Fibra 500", "label": "buena"},
-     {"customer": "Luis Paredes","phone_number": "923456789", "monthly_price": 40.00, "plan_name": "Fibra 750", "label": "mala"}
+     {"customer": "Ana Quispe",  "phone_number": "912345678", "monthly_price": 99.00, "plan_name": "Fibra 200", "label": "buena"},
+     {"customer": "Luis Paredes","phone_number": "923456789", "monthly_price": 40.00, "plan_name": "Fibra 300", "label": "mala"}
    ]
    ```
 
@@ -53,8 +53,8 @@ Láminas: `WIN-Reto03-Pitch-3min.pptx` · Guion hablado: `GUION-PITCH-3MIN.md`.
    - **Reporte de ingesta**: columnas mapeadas (algunas `mapeado por IA`), no
      reconocidas, faltantes. "No se cae con columnas ajenas."
    - **Lectura del lote**: resumen de la IA con el patrón y la prioridad.
-   - **Tabla**: Ana APROBAR, Luis REVISAR (S/ 40 muy por debajo del tarifario
-     de Fibra 750).
+   - **Tabla**: Ana APROBAR, Luis REVISAR (S/ 40 muy por debajo de los S/ 119
+     de Fibra 300 en la cartilla).
    - **Matriz de confusión**: contra las etiquetas `buena` / `mala`.
 3. Tocar el veredicto de Luis → sección 4 de esta guía.
 
@@ -116,6 +116,15 @@ De arriba hacia abajo:
 - Si una fila está rota, el reporte la lista y el resto sigue.
 - Positivo = REVISAR o RETENER. ABSTENERSE = no hay evidencia suficiente para
   decidir; se dice explícitamente en vez de adivinar.
+- **Si el lote nombra un plan que solo existe en la web** (Fibra 350, 500, 550,
+  750, 850) sin decir qué catálogo lo gobierna, el sistema **se abstiene** con la
+  regla R37 «Falta el catálogo que gobierna esta velocidad». No es un fallo: es
+  el problema de los tres tarifarios de WIN hecho visible. Decir: "La cartilla
+  legal no tiene ese plan; la web sí, con dos precios distintos. Antes de
+  afirmar un defecto, pedimos el catálogo de referencia." Con
+  `catalogo_referencia_id: web_hogar` (o `web_chiclayo`) en la fila, decide.
+- Planes de la cartilla (deciden siempre): Fibra 100 (S/ 79, provincias), 200
+  (S/ 99), 300 (S/ 119), 400 (S/ 129), 600 (S/ 169), 1000 (S/ 259).
 
 ---
 
@@ -153,16 +162,20 @@ De arriba hacia abajo:
 6. **¿Cómo tratan al vendedor?** No es vigilancia. Protege al vendedor honesto:
    su venta buena pasa rápido y no carga con el costo del que no lo es. Las
    señales son de la venta, no de la persona.
-7. **¿Falsos positivos?** Sobre los 25 casos demo: 0 falsos positivos. El corte
+7. **¿Por qué se abstuvo en mi fila?** Porque el plan solo existe en una página
+   web y no en la cartilla legal, y WIN publica dos precios web distintos. Sin
+   saber qué catálogo gobierna la venta, afirmar un defecto sería inventar. Con
+   el campo `catalogo_referencia_id` decide; está en el contrato de datos.
+8. **¿Falsos positivos?** Sobre los 25 casos demo: 0 falsos positivos. El corte
    por costo evita retener ventas buenas: retener también cuesta.
-8. **¿Qué necesita WIN para adoptarlo?** Día uno: autónomo con el tarifario
+9. **¿Qué necesita WIN para adoptarlo?** Día uno: autónomo con el tarifario
    público. Luego: registro por API, promesa textual y reedición como datos,
    webhooks de despacho/facturación/atención. Piloto de 30 días con Calidad de
    Venta.
-9. **¿Qué pasa con la privacidad?** Solo datos sintéticos en la demo. En
+10. **¿Qué pasa con la privacidad?** Solo datos sintéticos en la demo. En
    producción el enlace de confirmación lleva un token aleatorio y no expone
    más que la promesa.
-10. **¿Qué no sabemos?** Tres cifras: mediana real venta → instalación,
+11. **¿Qué no sabemos?** Tres cifras: mediana real venta → instalación,
     porcentaje de instalaciones fallidas y costo por minuto del analista. El
     modelo de costo muestra cuánto se mueve el umbral con cada una.
 

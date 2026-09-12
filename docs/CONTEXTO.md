@@ -41,8 +41,8 @@ engine/          motor: facts, rules, cost, counterfactual, llm, ingest
 app/             FastAPI: rutas, templates, static
 confirm/         confirmación del cliente y enlace por token
 config/          reglas, catálogo, costos, léxico y ventanas en YAML
-data/            casos sintéticos etiquetados (cases.json)
-tests/           solo el motor (test_engine.py)
+data/            casos sintéticos (cases.json, casos-adversarios.json)
+tests/           motor, ingesta, IA, app y banco adversario
 docs/            CONTEXTO, preguntas, entrevista, guion
 ```
 
@@ -75,9 +75,11 @@ No se reabren. Cada una con su porqué.
   `ANTHROPIC_API_KEY`), sin red, con `LLM_DISABLE=1` o ante excepción, degrada a
   comparador determinista y lo dice en pantalla (`llm_mode`). La IA extrae, mapea
   y explica; **nunca decide**. La demo nunca depende de una llamada externa.
-- **Ventana de diseño** (`install_window_hours: 48`, `confirmation_window_hours:
-  24`, `alert_buffer_hours: 12`): toda la arquitectura se justifica contra el
-  tiempo entre venta e instalación, no contra la exactitud teórica.
+- **Ventana de diseño** (`install_ceiling_days: 30` = P-01, techo contractual del
+  Anexo 1; `install_median_days` y `verification_window_days: 10` = P-07;
+  `confirmation_window_hours: 240`; `alert_buffer_hours: 24`): toda la
+  arquitectura se justifica contra el tiempo entre venta e instalación, no contra
+  la exactitud teórica.
 - **Decisión por costo esperado**, no por score: `p(outcome) = 1 − Π(1 − p_i)`
   (noisy-OR) más prior por canal; `expected_cost = Σ p(o) × cost(o)`; el corte
   es donde el costo esperado supera el costo de revisar. La cola se ordena por
@@ -100,6 +102,7 @@ No se reabren. Cada una con su porqué.
 | Frases de promesa insostenibles, alias | `config/lexicon.yaml` |
 | Ventanas y parámetros de señales | `config/settings.yaml` |
 | Casos sintéticos etiquetados | `data/cases.json` |
+| Banco de 24 casos adversarios | `data/casos-adversarios.json` |
 | Tipos compartidos | `contracts/types.py` |
 | Estado en ejecución | `data/state.json` |
 
@@ -145,33 +148,41 @@ Gates, en este orden:
 
 ## 6. Qué está terminado, qué está a medias, qué no se empezó
 
-**Estado real, leído del código (12/09). T1–T5 terminados y commiteados. Falta
-solo el despliegue a una URL pública, pendiente de crear la cuenta de hosting.**
+**Estado real, leído del código (12/09). T1–T10 terminados y commiteados; T10b
+(documentación) en curso. Falta solo el despliegue a una URL pública, pendiente
+de crear la cuenta de hosting.**
 
 - **Terminado:**
   - `contracts/types.py` (congelado) y `app/store.py` (JSON + lock de proceso).
-  - Motor (`engine/`): `evaluate`, facts, 29 reglas en `config/rules.yaml`
-    (seis aristas del rombo + señales), costo esperado (noisy-OR), decisión,
-    contrafáctico, capa de IA (OpenCode Go) con degradación determinista e
-    ingesta tolerante (`engine.ingest.parse`).
-  - Config (`config/*.yaml`): catálogo, reglas, costos, léxico y ventanas, todo
-    `SUPUESTO_DEMO`.
-  - Web (`app/`): formulario, veredicto, edición, lote, bandeja y salud.
+  - Motor (`engine/`): `evaluate`, facts, 39 reglas en `config/rules.yaml`
+    (R01–R29 del rombo y las señales, R30–R39 del banco adversario), costo
+    esperado (noisy-OR sobre los parámetros `P-NN` de `MODELO-DE-COSTO.md`),
+    decisión, contrafáctico, capa de IA (OpenCode Go) con degradación
+    determinista e ingesta tolerante (`engine.ingest.parse`, sinónimos de los 30
+    campos del contrato).
+  - Config (`config/*.yaml`): catálogo de la **cartilla** con **tres
+    superficies** (`cartilla`, `web_hogar`, `web_chiclayo`), reglas, costos
+    (costo de revisar = P-16 × P-17 = S/ 30,00), léxico y ventanas.
+  - Web (`app/`): formulario, veredicto, edición, lote, bandeja y salud. El
+    veredicto muestra el vocabulario del modelo de costo: `pasa` / `revisar` /
+    `revisar (prioridad máxima)` / `abstención`.
   - Confirmación (`confirm/`): enlace por token, pantalla del cliente,
     corregir/desconocer y silencio.
-  - `data/cases.json`: 25 casos sintéticos etiquetados (12 "buena", 13 "mala",
-    varios de borde).
+  - `data/cases.json`: 25 casos sintéticos de demo. `data/casos-adversarios.json`:
+    los 24 casos del banco, clasificados **24/24** según el veredicto esperado y
+    la regla principal de cada caso.
   - Despliegue listo: `Dockerfile`, `render.yaml`, `fly.toml`.
-  - Tests: 65 verdes (`tests/test_engine.py`, `tests/test_ingest.py`,
-    `tests/test_llm.py`, `tests/test_app.py`).
+  - Tests: 97 verdes (`tests/test_engine.py`, `test_ingest.py`, `test_llm.py`,
+    `test_app.py`, `test_adversarial.py`).
 - **A medias:** —
 - **No empezado / pendiente:** despliegue a URL pública (falta la cuenta de
   hosting); edición de
   umbrales desde la UI (solo si sobra tiempo).
 
 Fases: T1 motor ✓ · T2 documentos + contrato ✓ · T3 web ✓ · T3b ingesta/lote ✓ ·
-T4 confirmación ✓ · T5 casos ✓ · T6 README/guion/contexto (este cierre) · T7
-verificación ✓ (nueve bloqueantes PASA, 12/09).
+T4 confirmación ✓ · T5 casos ✓ · T6 README/guion/contexto ✓ · T7 verificación ✓
+(nueve bloqueantes PASA) · T8 rebrand ✓ · T9 IA real ✓ · T10 cumplimiento del
+banco, contrato y modelo de costo ✓ · T10b documentación (este cierre).
 
 ---
 

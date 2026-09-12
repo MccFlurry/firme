@@ -239,3 +239,58 @@ conversación lo resuelve.
 Todo el bloque C. Es lo que habilita verificar la promesa y el consentimiento.
 Sin ellos el sistema es un validador de condiciones comerciales; con ellos
 responde la pregunta completa del reto.
+
+---
+
+## Apéndice — Correspondencia con el prototipo
+
+Cómo se materializa cada campo del §4 en el prototipo. `contracts/types.py` está
+congelado, de modo que los campos nuevos viajan en `Sale.extra` con la clave
+canónica del contrato; el motor los lee desde ahí (`engine/facts.py`). Las reglas
+que no usan un campo hoy lo conservan en `extra` para no perderlo y están
+marcadas con «—».
+
+### Bloque A — Literal del Anexo 1
+
+| Campo del contrato | Campo `Sale` / clave `extra` | Regla(s) que lo usan |
+|---|---|---|
+| `velocidad_contratada` | `extra.velocidad_contratada` (deriva `plan` si no hay) | R04, R36, R37 |
+| `precio_mensual` | `Sale.price` | R03, R07, R12 |
+| `plazo_estimado_instalacion` | `extra.plazo_estimado_instalacion` | R11 |
+| `forma_pago_instalacion` | `extra.forma_pago_instalacion` | — |
+| `cargo_instalacion_costo` | `extra.cargo_instalacion_costo` | R35 |
+| `cargo_instalacion_cuotas` | `extra.cargo_instalacion_cuotas` | R35 |
+| `forma_pago` | `extra.forma_pago` | — |
+| `forma_entrega_recibo` | `extra.forma_entrega_recibo` | R31, R35 |
+| `plazo_vigencia` | `extra.plazo_vigencia` | R30 |
+| `direccion` | `Sale.address` | R10, R17, R36 |
+| `etapa` | `extra.etapa` | — |
+| `nombre_condominio` | `extra.nombre_condominio` | R34 |
+| `torre` | `extra.torre` | R17, R34 |
+| `departamento` | `extra.departamento` | R17, R34 |
+| `tenencia` | `extra.tenencia` | R33 |
+| `telefono_1` | `Sale.phone` | R14, R33 |
+| `telefono_2` | `extra.telefono_2` | — |
+| `correo_electronico` | `Sale.email` | R15 |
+| `nombre_asesor` | `Sale.seller_id` | R18, R27 |
+| `equipo` | `extra.equipo` | R27 |
+| `cliente_documento` | `Sale.customer_doc` | R16 |
+
+### Bloque B — Derivable de lo existente
+
+| Campo del contrato | Campo `Sale` / clave `extra` | Regla(s) que lo usan |
+|---|---|---|
+| `fecha_hora_registro` | `Sale.registered_at` | R11, R17, R18, R20, R39 |
+| `canal` | `Sale.channel` | R27 |
+| `ediciones_registro` | `Sale.edits` | R21, R22 |
+| `score_crediticio` | `extra.score_crediticio` | R32 |
+
+### Bloque C — No existe hoy
+
+| Campo del contrato | Campo `Sale` / clave `extra` | Regla(s) que lo usan |
+|---|---|---|
+| `promesa_declarada` | `Sale.promise_text` (normalizada a `Promise`) | R01, R02, R06–R09, R23, R28–R31, R35, R37–R38 |
+| `catalogo_referencia_id` | `extra.catalogo_referencia_id` | R37, R38 |
+| `confirmacion_titular` | `extra.confirmacion_titular` → `facts.confirmation_status` | R06–R09, R13–R16, R24–R26, R33, R39 |
+| `confirmacion_titular_ts` | `extra.confirmacion_titular_ts` | R39 |
+| `acta_instalacion_ts` | `extra.acta_instalacion_ts` | — |

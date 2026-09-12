@@ -69,6 +69,28 @@ bloque 5.*
 
 ---
 
+## Bloque 3b · El banco de 24 casos adversarios — (30 s, absorbe tiempo extra)
+
+**En pantalla:** `GET /lote` → tocar **"Cargar los 24 casos adversarios"**
+(`data/casos-adversarios.json`).
+
+**Qué se muestra y se dice:**
+
+- La matriz y la lista con los 24 veredictos **esperados contra obtenidos:
+  24/24**, cada caso con su regla principal y su vocabulario `pasa` / `revisar` /
+  `abstención`.
+- Abrir **DEF-04** ("99 soles, todo incluido" con recibo físico) → regla `R31`
+  (recibo físico no declarado), fuente `PÚBLICO` §4. Es la trampa del precio
+  correcto con un recargo que la promesa no declara.
+- Abrir **LIM-01** (S/ 39,50 promocional sin declarar la primera factura) →
+  regla `R35`, fuente `PÚBLICO` §2.2/§2.6. La primera factura nunca es igual al
+  precio prometido.
+- Abrir **AMB-03** (850 Mbps sin `catalogo_referencia_id`) → **abstención**, regla
+  `R37`: el sistema declara que no tiene contra qué validar, y esa honestidad es
+  la que lo hace confiable.
+
+---
+
 ## Bloque 4 · La confirmación desde un segundo teléfono — 2:30–3:30 (60 s)
 
 **En pantalla:** el veredicto → `POST /confirm/create/{id}` genera un enlace corto.

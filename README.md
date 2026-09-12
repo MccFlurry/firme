@@ -34,6 +34,32 @@ en revisión, protege al cliente de una promesa que no se sostiene y protege al
 vendedor honesto de cargar con el costo del que no lo es.** No es vigilancia
 sobre el vendedor.
 
+El veredicto habla en el vocabulario del modelo de costo: **APROBAR · pasa**,
+**REVISAR · revisar**, **RETENER · revisar (prioridad máxima)** y
+**ABSTENERSE · abstención**. El costo de revisar es `P-16 × P-17` = 12 minutos ×
+S/ 2,50 = **S/ 30,00**; una venta se revisa o retiene solo cuando su costo
+esperado supera el costo de revisarla.
+
+---
+
+## Los tres catálogos de WIN
+
+La evidencia pública (`docs/EVIDENCIA-PUBLICA.md` §1) muestra que WIN publica
+**tres catálogos comerciales distintos y mutuamente inconsistentes** en su propio
+dominio:
+
+| Fuente | Escalones de velocidad | Precios | Promoción |
+|---|---|---|---|
+| Cartilla informativa (documento legal, feb-2024) | 100 · 200 · 300 · 400 · 600 · 1000 Mbps | S/ 79 – S/ 259 | no menciona |
+| `win.pe/hogar` | 500 · 850 · 1000 Mbps | S/ 99 – S/ 179,90 | 1 mes |
+| `win.pe/chiclayo` | 350 · 550 · 750 · 1000 Mbps | S/ 79 – S/ 159,90 | 3 meses |
+
+Validar una promesa exige un catálogo de referencia único, y WIN no lo tiene: un
+vendedor puede prometer de buena fe algo de la página de Chiclayo mientras el
+contrato que firma el cliente se rige por la cartilla. **Parte del problema que
+el reto describe existe aguas arriba del vendedor.** Lo exponemos como hallazgo
+de arquitectura de información, nunca como señalamiento.
+
 ---
 
 ## 3. Demo en vivo
@@ -51,21 +77,23 @@ Sin credenciales y sin instalar nada: ábrela en tu propio teléfono.
 ## 4. Cómo probarlo en 60 segundos
 
 1. Abre la demo y ve a **Lote** (en la barra superior).
-2. Pega este lote. Usa un **esquema distinto al interno** a propósito: las
-   columnas se llaman `customer`, `phone_number`, `monthly_price` y `plan_name`,
-   y la ingesta las mapea por nombre aproximado.
+2. Pega este lote de dos filas, con los nombres exactos del **Anexo 1** del
+   contrato (`promesa_declarada`, `velocidad_contratada`, `precio_mensual`,
+   `forma_entrega_recibo`, `confirmacion_titular`):
 
    ```json
    [
-     {"customer": "Ana Quispe",  "phone_number": "912345678", "monthly_price": 99.00, "plan_name": "Fibra 500", "label": "buena"},
-     {"customer": "Luis Paredes","phone_number": "923456789", "monthly_price": 40.00, "plan_name": "Fibra 750", "label": "mala"}
+     {"promesa_declarada": "Plan de 200 megas a 99 soles al mes", "velocidad_contratada": 200, "precio_mensual": 99.00, "forma_entrega_recibo": "Electronico", "confirmacion_titular": "confirmada", "etiqueta": "pasa"},
+     {"promesa_declarada": "99 soles al mes, todo incluido", "velocidad_contratada": 200, "precio_mensual": 99.00, "forma_entrega_recibo": "Fisico", "confirmacion_titular": "confirmada", "etiqueta": "revisar"}
    ]
    ```
 
-3. Envía el lote. Verás dos veredictos: la primera venta **APROBAR** y la segunda
-   **REVISAR** (precio S/ 40 por debajo del tarifario de Fibra 750), cada una con
-   su cadena de evidencia, costo esperado y contrafáctico; abajo, la matriz de
-   confusión contra las etiquetas.
+3. Envía el lote. Verás dos veredictos: la primera venta **APROBAR** (sin
+   evidencia de defecto, costo esperado S/ 1,53, por debajo del costo de revisar)
+   y la segunda **REVISAR** con la regla `R31` (recibo físico no declarado): se
+   prometió S/ 99 "todo incluido" y el recibo físico agrega S/ 10, total
+   S/ 109. Cada una con su cadena de evidencia, fuente y contrafáctico; abajo, la
+   matriz de confusión contra las etiquetas.
 
 No se cae con columnas desconocidas ni con filas corruptas: las reporta y sigue.
 
@@ -75,10 +103,13 @@ No se cae con columnas desconocidas ni con filas corruptas: las reporta y sigue.
 
 **Real — corre de verdad, sin red y sin credenciales:**
 
-- El motor de reglas (29 reglas sobre las seis aristas del rombo y las señales),
+- El motor de reglas (39 reglas sobre las seis aristas del rombo y las señales),
   la ingesta tolerante, el cálculo de costo esperado, el contrafáctico, el flujo
   de confirmación por enlace y la bandeja de avisos. Todo funciona de punta a
   punta con datos que el propio jurado ingresa.
+- El banco de 24 casos adversarios (`data/casos-adversarios.json`) se clasifica
+  **24/24**: cada `pasa`, `revisar` y `abstención` esperado coincide con el
+  veredicto obtenido y con la regla principal del caso.
 - La capa de IA (extracción, mapeo, redacción y resumen) corre de verdad con
   OpenCode Go; ver *IA aplicada*.
 
@@ -154,6 +185,25 @@ los priors dejan de ser supuestos de demo.
 
 El contrato entre las tres carpetas es el tipo compartido de `/contracts`,
 congelado al cerrar la fase 1.
+
+---
+
+## Documentos
+
+Los cinco entregables del equipo y los del prototipo viven juntos en el repo:
+
+| Documento | Qué es |
+|---|---|
+| `docs/RETO-03-FUENTE.md` | Enunciado y rúbrica oficiales del reto, citados en literal |
+| `docs/EVIDENCIA-PUBLICA.md` | Cartilla, contrato, Anexo 1 y OSIPTEL, con fuente exacta |
+| `docs/MODELO-DE-COSTO.md` | Parámetros `P-NN`, cuatro desenlaces y umbral de decisión |
+| `docs/CASOS-ADVERSARIOS.md` | Banco de 24 casos adversarios (buenas, defectuosas, ambiguas, límite) |
+| `CONTRATO-DE-DATOS.md` | 30 campos, mecanismo de entrega, degradación y minimización |
+| `config/*.yaml` | Reglas R01–R39, catálogo (tres superficies), costos, léxico y ventanas |
+| `engine/` · `app/` · `confirm/` | Motor, superficie web y circuito de confirmación |
+| `data/cases.json` | 25 casos sintéticos de demo |
+| `data/casos-adversarios.json` | Espejo del banco, listo para cargar en `/lote` |
+| `tests/` | 97 tests (motor, ingesta, IA, app y banco adversario) |
 
 ---
 
