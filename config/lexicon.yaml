@@ -1,0 +1,28 @@
+origen: SUPUESTO_DEMO
+fuente: "Plan Prometido T1, vocabulario sintético de promesas insostenibles."
+claims:
+  - text: gratis para siempre
+    aliases: [gratis para siempre, gratis de por vida]
+    status: inexistente
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido, señal lingüística."
+  - text: sin contrato
+    aliases: [sin contrato]
+    status: inexistente
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido, señal lingüística."
+  - text: velocidad garantizada
+    aliases: [velocidad garantizada, velocidad siempre garantizada]
+    status: insostenible
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido, señal lingüística."
+  - text: instalación hoy
+    aliases: [instalación hoy, te instalan hoy, te instalamos hoy]
+    status: insostenible
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido, señal lingüística."
+plan_aliases:
+  fibra_1000:
+    aliases: [un gigabit, una giga]
+    origen: SUPUESTO_DEMO
+    fuente: "Vocabulario de demostración, equivalente a 1000 Mbps."

@@ -1,0 +1,16 @@
+origen: SUPUESTO_DEMO
+fuente: "Plan Prometido: ventanas y umbrales de señales para la demo."
+install_window_hours: 48
+confirmation_window_hours: 24
+alert_buffer_hours: 12
+timezone: America/Lima
+burst_window_minutes: 10
+burst_threshold: 3
+fill_seconds_threshold: 40
+night_start_hour: 23
+night_end_hour: 6
+price_edits_threshold: 2
+identity_edits_threshold: 1
+contact_collisions_threshold: 1
+address_collisions_threshold: 1
+cohort_prior_threshold: 0.1

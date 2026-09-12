@@ -1,0 +1,79 @@
+origen: SUPUESTO_DEMO
+fuente: "Plan Prometido T1: catálogo sintético; no representa tarifas ni cobertura vigentes de WIN."
+plans:
+  fibra_200:
+    name: Fibra 200 Mbps
+    speed_mbps: 200
+    price: 79.90
+    tech: fibra
+    aliases: [fibra 200, 200 megas, plan 200]
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, catálogo de demostración."
+  fibra_400:
+    name: Fibra 400 Mbps
+    speed_mbps: 400
+    price: 99.90
+    tech: fibra
+    aliases: [fibra 400, 400 megas, plan 400]
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, catálogo de demostración."
+  fibra_600:
+    name: Fibra 600 Mbps
+    speed_mbps: 600
+    price: 119.90
+    tech: fibra
+    aliases: [fibra 600, 600 megas, plan 600]
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, catálogo de demostración."
+  fibra_1000:
+    name: Fibra 1000 Mbps
+    speed_mbps: 1000
+    price: 149.90
+    tech: fibra
+    aliases: [fibra 1000, 1000 megas, plan 1000, un giga]
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, catálogo de demostración."
+promos:
+  primer_mes_gratis:
+    name: Primer mes gratis
+    aliases: [primer mes gratis, un mes gratis]
+    applies_to: [fibra_400, fibra_600, fibra_1000]
+    months: 1
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, promociones de demostración."
+  descuento_3m:
+    name: S/ 20 de descuento por 3 meses
+    aliases: [descuento de 20 soles por 3 meses, descuento por 3 meses, descuento 3m]
+    applies_to: [fibra_200, fibra_400]
+    discount: 20
+    months: 3
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, promociones de demostración."
+coverage:
+  chiclayo_centro:
+    tech: [fibra]
+    max_speed_mbps: 1000
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, cobertura sintética."
+  la_victoria:
+    tech: [fibra]
+    max_speed_mbps: 600
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, cobertura sintética."
+  jose_leonardo_ortiz:
+    tech: [fibra]
+    max_speed_mbps: 400
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, cobertura sintética."
+  pimentel:
+    tech: [inalambrico]
+    max_speed_mbps: 50
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, cobertura sintética."
+  monsefu:
+    tech: []
+    max_speed_mbps: 0
+    origen: SUPUESTO_DEMO
+    fuente: "Plan Prometido T1, cobertura sintética."
+price_tolerance: 0.02
+install_sla_days: 3

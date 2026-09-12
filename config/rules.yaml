@@ -1,0 +1,572 @@
+- id: R01_plan_prometido_inexistente
+  name: Plan prometido fuera del catálogo
+  description: El plan prometido {promise_plan} no existe en el catálogo de demostración.
+  condition: promise_plan is not None and not promise_plan_exists
+  severity: alta
+  message: El plan prometido {promise_plan} no existe en el catálogo de demostración.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-catalogo
+  strength: determinista
+  inputs:
+  - promise_plan
+  - promise_plan_exists
+  impacts:
+    reclamo: 0.35
+    baja_temprana: 0.15
+  fix: null
+- id: R02_precio_prometido_distinto
+  name: Precio prometido distinto al catálogo
+  description: La promesa indica S/ {promise_price}; el catálogo con la promoción aplicable indica S/ {promise_catalog_price}.
+  condition: promise_price is not None and promise_catalog_price is not None and (promise_price < promise_catalog_price *
+    (1 - price_tolerance) or promise_price > promise_catalog_price * (1 + price_tolerance))
+  severity: media
+  message: La promesa indica S/ {promise_price}; el catálogo con la promoción aplicable indica S/ {promise_catalog_price}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-catalogo
+  strength: determinista
+  inputs:
+  - promise_price
+  - promise_catalog_price
+  - price_tolerance
+  impacts:
+    reclamo: 0.25
+    reversion_facturacion: 0.25
+  fix: null
+- id: R03_precio_bajo_tarifa
+  name: Precio registrado por debajo del tarifario
+  description: Precio registrado S/ {price} por debajo del tarifario S/ {catalog_price}.
+  condition: price is not None and catalog_price is not None and price < catalog_price * (1 - price_tolerance)
+  severity: alta
+  message: Precio registrado S/ {price} por debajo del tarifario S/ {catalog_price}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: catalogo-registro
+  strength: determinista
+  inputs:
+  - price
+  - catalog_price
+  - price_tolerance
+  impacts:
+    reclamo: 0.35
+    reversion_facturacion: 0.4
+  fix:
+    field: price
+    value: catalog_price
+    reason: igualar al tarifario vigente
+- id: R04_plan_inexistente
+  name: Plan registrado inexistente
+  description: El plan registrado {plan} no existe en el catálogo.
+  condition: plan is not None and not plan_exists
+  severity: alta
+  message: El plan registrado {plan} no existe en el catálogo.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: catalogo-registro
+  strength: determinista
+  inputs:
+  - plan
+  - plan_exists
+  impacts:
+    instalacion_fallida: 0.5
+    reclamo: 0.2
+  fix: null
+- id: R05_promo_no_aplicable
+  name: Promoción registrada no aplicable
+  description: La promoción {promo} no se puede combinar con el plan registrado {plan}.
+  condition: promo is not None and promo_applies is False
+  severity: media
+  message: La promoción {promo} no se puede combinar con el plan registrado {plan}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: catalogo-registro
+  strength: determinista
+  inputs:
+  - plan
+  - promo
+  - promo_applies
+  impacts:
+    reclamo: 0.25
+    reversion_facturacion: 0.3
+  fix: null
+- id: R06_plan_promesa_registro
+  name: Plan prometido distinto del registro
+  description: Se prometió {promise_plan} y se registró {plan}.
+  condition: promise_plan is not None and plan is not None and promise_plan != plan and confirmation_status != "confirmada"
+  severity: alta
+  message: Se prometió {promise_plan} y se registró {plan}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-registro
+  strength: determinista
+  inputs:
+  - promise_plan
+  - plan
+  - confirmation_status
+  impacts:
+    reclamo: 0.35
+    baja_temprana: 0.12
+  fix:
+    field: plan
+    value: promise_plan
+    reason: registrar el plan acordado con el cliente
+- id: R07_precio_promesa_registro
+  name: Precio prometido distinto del registro
+  description: Se prometió S/ {promise_price} y se registró S/ {price}.
+  condition: promise_price is not None and price is not None and (price < promise_price * (1 - price_tolerance) or price >
+    promise_price * (1 + price_tolerance)) and confirmation_status != "confirmada"
+  severity: media
+  message: Se prometió S/ {promise_price} y se registró S/ {price}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-registro
+  strength: determinista
+  inputs:
+  - promise_price
+  - price
+  - price_tolerance
+  - confirmation_status
+  impacts:
+    reclamo: 0.25
+    reversion_facturacion: 0.2
+  fix:
+    field: price
+    value: promise_price
+    reason: hacer coincidir el registro con el precio acordado
+- id: R08_promo_promesa_registro
+  name: Promoción prometida distinta del registro
+  description: Se prometió la promoción {promise_promo} y se registró {promo}.
+  condition: promise_promo is not None and promise_promo != promo and confirmation_status != "confirmada"
+  severity: media
+  message: Se prometió la promoción {promise_promo} y se registró {promo}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-registro
+  strength: determinista
+  inputs:
+  - promise_promo
+  - promo
+  - confirmation_status
+  impacts:
+    reclamo: 0.25
+    reversion_facturacion: 0.2
+  fix:
+    field: promo
+    value: promise_promo
+    reason: registrar la promoción acordada
+- id: R09_fecha_promesa_registro
+  name: Plazo prometido distinto del registro
+  description: Se prometió instalar en {promise_install_days} días; el registro indica {registered_install_days} días.
+  condition: promise_install_days is not None and registered_install_days is not None and promise_install_days != registered_install_days
+    and confirmation_status != "confirmada"
+  severity: media
+  message: Se prometió instalar en {promise_install_days} días; el registro indica {registered_install_days} días.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-registro
+  strength: determinista
+  inputs:
+  - promise_install_days
+  - registered_install_days
+  - confirmation_status
+  impacts:
+    instalacion_fallida: 0.15
+    reclamo: 0.15
+  fix:
+    field: install_date
+    value: promise_install_date
+    reason: registrar la fecha de instalación acordada
+- id: R10_sin_cobertura
+  name: Zona incompatible con el plan
+  description: 'El plan {plan} ({catalog_speed} Mbps) no es entregable en {district}: máximo {zone_max_speed} Mbps y tecnología
+    según catálogo.'
+  condition: zone_supports_plan is False
+  severity: alta
+  message: 'El plan {plan} ({catalog_speed} Mbps) no es entregable en {district}: máximo {zone_max_speed} Mbps y tecnología
+    según catálogo.'
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: registro-entrega
+  strength: determinista
+  inputs:
+  - plan
+  - district
+  - catalog_speed
+  - zone_max_speed
+  - zone_supports_plan
+  impacts:
+    instalacion_fallida: 0.7
+    baja_temprana: 0.1
+  fix: null
+- id: R11_instalacion_fuera_ventana
+  name: Instalación fuera de ventana
+  description: La instalación {install_date} cae fuera de la ventana desde el registro {registered_at}.
+  condition: install_within_window is False
+  severity: media
+  message: La instalación {install_date} cae fuera de la ventana desde el registro {registered_at}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: registro-entrega
+  strength: determinista
+  inputs:
+  - registered_at
+  - install_date
+  - install_within_window
+  impacts:
+    instalacion_fallida: 0.2
+    reclamo: 0.15
+  fix:
+    field: install_date
+    value: window_install_date
+    reason: ubicar la instalación dentro de la ventana configurada
+- id: R12_facturacion_distinta
+  name: Monto a facturar distinto del registro
+  description: Se facturaría S/ {billing_amount}, pero se registró S/ {price}.
+  condition: billing_amount is not None and price is not None and (billing_amount < price * (1 - price_tolerance) or billing_amount
+    > price * (1 + price_tolerance))
+  severity: media
+  message: Se facturaría S/ {billing_amount}, pero se registró S/ {price}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: registro-entrega
+  strength: determinista
+  inputs:
+  - billing_amount
+  - price
+  - price_tolerance
+  impacts:
+    reclamo: 0.25
+    reversion_facturacion: 0.4
+  fix: null
+- id: R13_sin_consentimiento
+  name: Falta evidencia de consentimiento
+  description: No hay evidencia de consentimiento (grabación, firma o SMS) y el cliente aún no confirmó.
+  condition: consent_missing and confirmation_status != "confirmada"
+  severity: media
+  message: No hay evidencia de consentimiento (grabación, firma o SMS) y el cliente aún no confirmó.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: identidad
+  strength: determinista
+  inputs:
+  - consent_missing
+  - confirmation_status
+  impacts:
+    reclamo: 0.2
+    baja_temprana: 0.12
+  fix: null
+- id: R14_colision_telefono
+  name: Colisión de teléfono entre titulares
+  description: El teléfono coincide con el de {phone_collisions} ventas de otro titular.
+  condition: phone_collisions is not None and phone_collisions >= contact_collisions_threshold and confirmation_status !=
+    "confirmada"
+  severity: alta
+  message: El teléfono coincide con el de {phone_collisions} ventas de otro titular.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: identidad
+  strength: determinista
+  inputs:
+  - phone_collisions
+  - contact_collisions_threshold
+  - confirmation_status
+  impacts:
+    reclamo: 0.25
+    baja_temprana: 0.2
+  fix: null
+- id: R15_colision_correo
+  name: Colisión de correo entre titulares
+  description: El correo coincide con el de {email_collisions} ventas de otro titular.
+  condition: email_collisions is not None and email_collisions >= contact_collisions_threshold and confirmation_status !=
+    "confirmada"
+  severity: alta
+  message: El correo coincide con el de {email_collisions} ventas de otro titular.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: identidad
+  strength: determinista
+  inputs:
+  - email_collisions
+  - contact_collisions_threshold
+  - confirmation_status
+  impacts:
+    reclamo: 0.25
+    baja_temprana: 0.2
+  fix: null
+- id: R16_colision_documento
+  name: Colisión de documento entre titulares
+  description: El documento coincide con el de {doc_collisions} ventas de otro titular.
+  condition: doc_collisions is not None and doc_collisions >= contact_collisions_threshold and confirmation_status != "confirmada"
+  severity: alta
+  message: El documento coincide con el de {doc_collisions} ventas de otro titular.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: identidad
+  strength: determinista
+  inputs:
+  - doc_collisions
+  - contact_collisions_threshold
+  - confirmation_status
+  impacts:
+    reclamo: 0.25
+    baja_temprana: 0.2
+  fix: null
+- id: R17_direccion_repetida
+  name: Dirección repetida en el día
+  description: La dirección normalizada coincide con {address_collisions} ventas adicionales del mismo día.
+  condition: address_collisions is not None and address_collisions >= address_collisions_threshold
+  severity: media
+  message: La dirección normalizada coincide con {address_collisions} ventas adicionales del mismo día.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: senal
+  strength: estadistica
+  inputs:
+  - address_collisions
+  - address_collisions_threshold
+  - address
+  - registered_at
+  impacts:
+    instalacion_fallida: 0.12
+    reclamo: 0.08
+  fix: null
+- id: R18_rafaga
+  name: Ráfaga de ventas
+  description: El vendedor {seller_id} registra {burst_count} ventas en la ventana temporal configurada.
+  condition: burst_count is not None and burst_count >= burst_threshold
+  severity: media
+  message: El vendedor {seller_id} registra {burst_count} ventas en la ventana temporal configurada.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: senal
+  strength: estadistica
+  inputs:
+  - seller_id
+  - burst_count
+  - burst_threshold
+  impacts:
+    reclamo: 0.12
+    baja_temprana: 0.06
+  fix: null
+- id: R19_llenado_rapido
+  name: Llenado demasiado breve
+  description: El formulario se completó en {fill_seconds} segundos, por debajo de {fill_seconds_threshold}.
+  condition: fill_seconds is not None and fill_seconds < fill_seconds_threshold
+  severity: media
+  message: El formulario se completó en {fill_seconds} segundos, por debajo de {fill_seconds_threshold}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: senal
+  strength: estadistica
+  inputs:
+  - fill_seconds
+  - fill_seconds_threshold
+  impacts:
+    reclamo: 0.12
+    baja_temprana: 0.06
+  fix: null
+- id: R20_hora_atipica
+  name: Registro en hora atípica
+  description: 'Hora local de registro: {hour}; dentro de la franja nocturna configurada.'
+  condition: hour is not None and (hour >= night_start_hour or hour < night_end_hour)
+  severity: baja
+  message: 'Hora local de registro: {hour}; dentro de la franja nocturna configurada.'
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: senal
+  strength: estadistica
+  inputs:
+  - hour
+  - night_start_hour
+  - night_end_hour
+  impacts:
+    reclamo: 0.1
+    baja_temprana: 0.03
+  fix: null
+- id: R21_reedicion_precio
+  name: Reedición repetida de precio
+  description: El precio se editó {price_edits} veces después del envío.
+  condition: price_edits >= price_edits_threshold
+  severity: alta
+  message: El precio se editó {price_edits} veces después del envío.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: senal
+  strength: estadistica
+  inputs:
+  - price_edits
+  - price_edits_threshold
+  impacts:
+    reclamo: 0.25
+    reversion_facturacion: 0.3
+  fix: null
+- id: R22_reedicion_identidad
+  name: Titular editado después del envío
+  description: El nombre o documento del titular se editó {identity_edits} veces después del envío.
+  condition: identity_edits is not None and identity_edits >= identity_edits_threshold
+  severity: media
+  message: El nombre o documento del titular se editó {identity_edits} veces después del envío.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: senal
+  strength: estadistica
+  inputs:
+  - identity_edits
+  - identity_edits_threshold
+  impacts:
+    reclamo: 0.15
+    baja_temprana: 0.08
+  fix: null
+- id: R23_promesa_insostenible
+  name: Condición prometida insostenible
+  description: 'La promesa contiene condiciones inexistentes o insostenibles: {unsupported_claims}.'
+  condition: unsupported_claims
+  severity: alta
+  message: 'La promesa contiene condiciones inexistentes o insostenibles: {unsupported_claims}.'
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-catalogo
+  strength: linguistica
+  inputs:
+  - unsupported_claims
+  impacts:
+    reclamo: 0.35
+    baja_temprana: 0.18
+  fix: null
+- id: R24_cliente_corrige
+  name: Cliente solicita una corrección
+  description: 'El cliente pidió corregir lo registrado: {confirmation_note}'
+  condition: confirmation_status == "corregida" and confirmation_status != "confirmada"
+  severity: media
+  message: 'El cliente pidió corregir lo registrado: {confirmation_note}'
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-registro
+  strength: determinista
+  inputs:
+  - confirmation_status
+  - confirmation_note
+  impacts:
+    reclamo: 0.3
+    reversion_facturacion: 0.25
+  fix: null
+- id: R25_cliente_desconoce
+  name: Cliente desconoce el servicio
+  description: El cliente indicó que no pidió este servicio.
+  condition: confirmation_status == "desconocida" and confirmation_status != "confirmada"
+  severity: bloqueante
+  message: El cliente indicó que no pidió este servicio.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: identidad
+  strength: determinista
+  inputs:
+  - confirmation_status
+  impacts:
+    instalacion_fallida: 0.9
+    reclamo: 0.8
+    baja_temprana: 0.9
+    reversion_facturacion: 0.7
+  fix: null
+- id: R26_sin_respuesta
+  name: Sin confirmación dentro de la ventana
+  description: Venció la ventana de confirmación sin respuesta del cliente.
+  condition: confirmation_status == "silencio" and confirmation_status != "confirmada"
+  severity: alta
+  message: Venció la ventana de confirmación sin respuesta del cliente.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: identidad
+  strength: determinista
+  inputs:
+  - confirmation_status
+  impacts:
+    instalacion_fallida: 0.6
+    reclamo: 0.5
+    baja_temprana: 0.5
+  fix: null
+- id: R27_prior_canal
+  name: Calibración por cohorte de canal
+  description: 'Prior supuesto del canal {channel}: {prior}. Calibra el costo esperado; no es una sanción al vendedor.'
+  condition: prior >= cohort_prior_threshold
+  severity: baja
+  message: 'Prior supuesto del canal {channel}: {prior}. Calibra el costo esperado; no es una sanción al vendedor.'
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: senal
+  strength: estadistica
+  inputs:
+  - channel
+  - prior
+  - cohort_prior_threshold
+  impacts: {}
+  fix: null
+- id: R28_velocidad_prometida
+  name: Velocidad prometida fuera del catálogo
+  description: La velocidad prometida {promise_speed_mbps} Mbps no coincide con la oferta del catálogo para esa promesa ({promise_catalog_speed}
+    Mbps).
+  condition: promise_speed_mbps is not None and (promise_speed_mbps not in catalog_speeds or (promise_catalog_speed is not
+    None and promise_speed_mbps != promise_catalog_speed))
+  severity: alta
+  message: La velocidad prometida {promise_speed_mbps} Mbps no coincide con la oferta del catálogo para esa promesa ({promise_catalog_speed}
+    Mbps).
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-catalogo
+  strength: determinista
+  inputs:
+  - promise_speed_mbps
+  - promise_catalog_speed
+  - catalog_speeds
+  impacts:
+    reclamo: 0.3
+    baja_temprana: 0.15
+  fix: null
+- id: R29_promo_prometida_no_aplicable
+  name: Promoción prometida no combinable
+  description: La promoción prometida {promise_promo} no aplica al plan prometido {promise_plan}.
+  condition: promise_promo is not None and promise_promo_applies is False
+  severity: media
+  message: La promoción prometida {promise_promo} no aplica al plan prometido {promise_plan}.
+  source: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  origen: SUPUESTO_DEMO
+  fuente: Supuesto del equipo para la demo (config/rules.yaml); no es una política de WIN.
+  edge: promesa-catalogo
+  strength: determinista
+  inputs:
+  - promise_plan
+  - promise_promo
+  - promise_promo_applies
+  impacts:
+    reclamo: 0.25
+    reversion_facturacion: 0.3
+  fix: null
