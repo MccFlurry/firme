@@ -40,7 +40,7 @@ def test_bank_preserves_every_document_input():
     document = (ROOT / "docs/CASOS-ADVERSARIOS.md").read_text()
     inputs = re.findall(r"```json\n(.*?)\n```", document, re.S)
     assert len(inputs) == len(CASES) == len(PRINCIPAL) == 24
-    metadata = {"id", "familia", "comparador", "veredicto_esperado", "extra"}
+    metadata = {"id", "familia", "comparador", "veredicto_esperado", "extra", "customer_name"}  # customer_name: synthetic display name, not part of the bank
     for case, source in zip(CASES, inputs):
         actual = {key: value for key, value in case.items() if key not in metadata}
         if case["id"] == "LIM-04":
