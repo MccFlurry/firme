@@ -17,7 +17,8 @@
     "comparador": "CATÁLOGO ↔ REGISTRO",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Carmen Díaz Ríos"
   },
   {
     "id": "BUE-02",
@@ -31,7 +32,8 @@
     "comparador": "PROMESA ↔ REGISTRO · precio total",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Pedro Salazar Luna"
   },
   {
     "id": "BUE-03",
@@ -46,7 +48,8 @@
     "comparador": "verificación de titularidad",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Rosa Huamán Cruz"
   },
   {
     "id": "BUE-04",
@@ -60,7 +63,8 @@
     "comparador": "combinación producto / zona",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Jorge Castillo Peña"
   },
   {
     "id": "BUE-05",
@@ -75,7 +79,8 @@
     "comparador": "cohorte por asesor",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Lucía Mendoza Paz"
   },
   {
     "id": "DEF-01",
@@ -88,7 +93,8 @@
     "comparador": "CATÁLOGO ↔ REGISTRO · precio",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Miguel Torres Vega"
   },
   {
     "id": "DEF-02",
@@ -101,7 +107,8 @@
     "comparador": "CATÁLOGO ↔ REGISTRO · velocidad",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Ana Flores Ruiz"
   },
   {
     "id": "DEF-03",
@@ -115,7 +122,8 @@
     "comparador": "PROMESA ↔ REGISTRO · permanencia",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Luis Chávez Mora"
   },
   {
     "id": "DEF-04",
@@ -129,7 +137,8 @@
     "comparador": "PROMESA ↔ REGISTRO · precio total",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Elena Rojas Silva"
   },
   {
     "id": "DEF-05",
@@ -144,7 +153,8 @@
     "comparador": "verificación de titularidad",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Raúl Vargas Soto"
   },
   {
     "id": "DEF-06",
@@ -160,7 +170,8 @@
     "comparador": "colisión de identidad",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Patricia Núñez Gil"
   },
   {
     "id": "DEF-07",
@@ -173,7 +184,8 @@
     "comparador": "condiciones de acceso publicadas",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Carlos Ramos León"
   },
   {
     "id": "DEF-08",
@@ -186,7 +198,8 @@
     "comparador": "PROMESA ↔ CATÁLOGO",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Gloria Paredes Ortiz"
   },
   {
     "id": "AMB-01",
@@ -200,7 +213,8 @@
     "comparador": "verificación de titularidad",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Héctor Quispe Lara"
   },
   {
     "id": "AMB-02",
@@ -214,7 +228,8 @@
     "comparador": "verificación de titularidad",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Isabel Cárdenas Ramos"
   },
   {
     "id": "AMB-03",
@@ -228,7 +243,8 @@
     "comparador": "PROMESA ↔ CATÁLOGO",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Manuel Espinoza Vera"
   },
   {
     "id": "AMB-04",
@@ -244,7 +260,8 @@
     "comparador": "verificación de titularidad",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Teresa Salinas Campos"
   },
   {
     "id": "AMB-05",
@@ -258,7 +275,8 @@
     "comparador": "PROMESA ↔ CATÁLOGO",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Andrés Guerrero Prado"
   },
   {
     "id": "AMB-06",
@@ -275,7 +293,8 @@
     "comparador": "colisión de dirección",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Silvia Medina Reyes"
   },
   {
     "id": "LIM-01",
@@ -292,7 +311,8 @@
     "comparador": "REGISTRO ↔ ENTREGABLE · primera factura",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Ricardo Alva Ponce"
   },
   {
     "id": "LIM-02",
@@ -306,7 +326,8 @@
     "comparador": "CATÁLOGO ↔ REGISTRO · precio",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Beatriz Aguilar Coronel"
   },
   {
     "id": "LIM-03",
@@ -323,7 +344,8 @@
     "comparador": "cohorte por asesor",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Fernando Ríos Tapia"
   },
   {
     "id": "LIM-04",
@@ -339,7 +361,8 @@
       "simulado": true,
       "nota_demo": "Ancla temporal añadida según T10 §8: el banco omite fecha_hora_registro; se usa 2026-08-30T10:00:00-05:00 para contrastar la respuesta con P-07 (10 días)."
     },
-    "fecha_hora_registro": "2026-08-30T10:00:00-05:00"
+    "fecha_hora_registro": "2026-08-30T10:00:00-05:00",
+    "customer_name": "Norma Benites Valle"
   },
   {
     "id": "LIM-05",
@@ -353,6 +376,7 @@
     "comparador": "combinación producto / zona",
     "extra": {
       "simulado": true
-    }
+    },
+    "customer_name": "Óscar Delgado Sánchez"
   }
 ]
